@@ -33,11 +33,12 @@
   - `lib/money.ts`, `lib/slug.ts`, `lib/phone.ts`, `lib/constants.ts`, `lib/utils.ts`
   - `convex/schema.ts`, `convex/http.ts`, `convex/crons.ts`, `convex/users.ts` (placeholders)
   - `app/(store)/README.md`, `app/(auth)/README.md`, `app/admin/README.md`, `app/account/README.md`, `components/*/README.md`, `lib/README.md`, `convex/lib/README.md`
-- **New env vars**: `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_SITE_URL` (see `.env.example`)
+- **New env vars**: `NEXT_PUBLIC_CONVEX_URL` (set to `https://aware-cobra-407.convex.cloud` in `.env.local`), `NEXT_PUBLIC_SITE_URL` (set to `http://localhost:3000`).
+- **Git & Remote**: Initialized Git repository, committed scaffold, added remote `origin` (`https://github.com/BRIGHTEDUFUL/MB-ventures.git`), and pushed branch `main`.
 - **New Convex functions**: None (placeholders only — full schema in Step 2, auth in Step 3)
 - **Known limitations**:
-  - `convex/_generated/` does not exist until user runs `npx convex dev` interactively for the first time (requires Convex login and project link)
-  - Convex placeholder files (`schema.ts`, `http.ts`, `crons.ts`, `users.ts`) are empty exports — to be implemented in Steps 2–3
+  - `npx convex dev` needs to run locally to bind the deployment and generate `convex/_generated` types for Step 2.
+  - Convex placeholder files (`schema.ts`, `http.ts`, `crons.ts`, `users.ts`) are minimal stubs — implemented in Steps 2–3.
 
 ---
 
