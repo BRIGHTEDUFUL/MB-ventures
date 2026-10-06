@@ -18,6 +18,9 @@ Next.js App Router, TypeScript (strict), Tailwind CSS, shadcn/ui, Convex (databa
 - Secrets only in environment variables. Never log secrets or full payment payloads containing card data.
 - Accessibility and mobile-first design are requirements, not extras.
 
+# UI RULES
+All UI work must follow docs/DESIGN.md. Anything on its Banned list must not appear in code, copy or images. When in doubt, choose the plainer option. Before finishing any UI task, run the checklist at the bottom of docs/DESIGN.md.
+
 # CODE STYLE
 TypeScript strict, no any without a justifying comment, small files, descriptive names, no dead code, comments only where intent is not obvious. Reusable UI goes in components/, domain logic in lib/ or convex/lib/.
 

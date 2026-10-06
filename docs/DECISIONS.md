@@ -11,6 +11,7 @@ Please fill in the `[FILL IN]` fields before Step 10.
 - **Dynamic rendering**: Public catalog pages render dynamically from Convex (no stale cache), so admin edits appear immediately and pages are still SEO-friendly (`export const dynamic = "force-dynamic"`).
 - **Backend catalog filtering**: Catalog filtering for the store is done in the backend over indexed category queries.
 - **Online payment first**: Online payment only via Paystack (cards and mobile money). Pay-on-pickup is an optional add-on post-launch.
+- **Storefront Design System (UI Design Pack)**: Adopted `docs/DESIGN.md` specification. Plain-spoken specialist retailer aesthetic; strict anti-AI-tells rulebook; restrained neutral palette with ink `#14181F`, canvas `#F4F5F6`, hairline borders `#E3E5E8`, single accent `#D9480F` for offers; typography Archivo + Public Sans + IBM Plex Mono; 8px max radius; hair-line borders; tabular-nums pricing; no gradients or fake urgency. Follows companion workflow UI-0 to UI-19.
 
 ---
 

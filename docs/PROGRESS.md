@@ -71,6 +71,23 @@
 
 ---
 
+### UI-0: Design specification integration (Storefront UI Design Pack)
+- **Date**: 2026-10-06
+- **What was done**:
+  - Integrated `Storefront UI Design Pack_ Professional Components and Hero.md`.
+  - Created [`docs/DESIGN.md`](file:///c:/Users/NHANA_K_OTTO/Desktop/Online%20Shop/docs/DESIGN.md) containing the full design specification, anti-AI-tells rulebook, color tokens (`ink`, `canvas`, `surface`, `line`, `accent`), typography standards (Archivo, Public Sans, IBM Plex Mono), component rules, motion limits, and review checklist.
+  - Added strict `UI RULES` section to [`AGENTS.md`](file:///c:/Users/NHANA_K_OTTO/Desktop/Online%20Shop/AGENTS.md) and [`CLAUDE.md`](file:///c:/Users/NHANA_K_OTTO/Desktop/Online%20Shop/CLAUDE.md).
+  - Updated [`docs/DECISIONS.md`](file:///c:/Users/NHANA_K_OTTO/Desktop/Online%20Shop/docs/DECISIONS.md) with design system decisions.
+- **Files added/changed**:
+  - `docs/DESIGN.md` (created)
+  - `AGENTS.md` (updated)
+  - `CLAUDE.md` (updated)
+  - `docs/DECISIONS.md` (updated)
+  - `docs/PROGRESS.md` (updated)
+- **Next up**: Can apply UI-1 (tokens, fonts, base components restyling) or continue building core capabilities in Step 3 (Authentication).
+
+---
+
 ## Convex function inventory
 
 | Name | Type | Access | Purpose |
