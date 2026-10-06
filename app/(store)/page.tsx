@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ShoppingBag, ShieldCheck, Truck, Store } from "lucide-react";
 
 export const dynamic = "force-dynamic";

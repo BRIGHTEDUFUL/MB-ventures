@@ -22,7 +22,7 @@ export function normalizePhone(
   }
 
   // Strip all whitespace, hyphens, parentheses, dots
-  let cleaned = input.trim().replace(/[\s\-().]/g, "");
+  const cleaned = input.trim().replace(/[\s\-().]/g, "");
 
   if (!cleaned) {
     return null;
