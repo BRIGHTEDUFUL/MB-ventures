@@ -42,6 +42,34 @@
 
 ---
 
+### Step 2: Schema and domain logic
+- **Date**: 2026-10-06
+- **What was done**:
+  - Implemented the full Convex schema in `convex/schema.ts` with all 17 tables, validators, and indexes (including search index `search_text` on products).
+  - Created shared domain logic in `convex/lib/`:
+    - `constants.ts`: Order statuses, payment statuses, fulfillment types, labels, and UI badge stylings.
+    - `orderStatus.ts`: Pure state machine with `canTransition` and `allowedNextStatuses`.
+    - `availability.ts`: `availableStock`, `stockLabel`, `effectivePrice`, and `isOnSale`.
+    - `searchText.ts`: `buildSearchText` for normalising product search index content.
+    - `validators.ts`: Reusable `v.*` schema & argument validators for addresses, orders, items, specs, and settings.
+  - Created `lib/domain.ts` re-exporting domain constants, logic, and types for Next.js frontend code.
+  - Authored comprehensive documentation in `docs/SCHEMA.md` explaining all 17 tables, fields, and indexing rationale in plain language.
+- **Files added/changed**:
+  - `convex/schema.ts`
+  - `convex/lib/constants.ts`
+  - `convex/lib/orderStatus.ts`
+  - `convex/lib/availability.ts`
+  - `convex/lib/searchText.ts`
+  - `convex/lib/validators.ts`
+  - `lib/domain.ts`
+  - `docs/SCHEMA.md`
+  - `docs/PROGRESS.md`
+- **New env vars**: None.
+- **New Convex functions**: None (schema and pure domain logic only).
+- **Known limitations**: `npx convex dev` needs to be linked interactively by running in terminal to deploy the schema and sync types to `convex/_generated`.
+
+---
+
 ## Convex function inventory
 
 | Name | Type | Access | Purpose |

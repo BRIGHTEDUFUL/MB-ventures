@@ -1,3 +1,262 @@
-// schema.ts – full schema implemented in Step 2.
-// Using `import` only to satisfy TypeScript before _generated is ready.
-export {};
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+import {
+  announcementValidator,
+  cartItemValidator,
+  customerValidator,
+  deliveryAddressValidator,
+  fulfillmentValidator,
+  heroSettingsValidator,
+  orderEventTypeValidator,
+  orderItemValidator,
+  orderStatusValidator,
+  paymentStatusValidator,
+  pickupSnapshotValidator,
+  promoTileValidator,
+  roleValidator,
+  socialLinksValidator,
+  specItemValidator,
+  stockAdjustmentReasonValidator,
+} from "./lib/validators";
+
+export default defineSchema({
+  // Users (will be extended with Convex Auth in Step 3)
+  users: defineTable({
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    role: roleValidator,
+    createdAt: v.number(),
+  })
+    .index("by_email", ["email"])
+    .index("by_role", ["role"]),
+
+  // Product categories (supports up to two levels via parentId)
+  categories: defineTable({
+    name: v.string(),
+    slug: v.string(),
+    parentId: v.optional(v.id("categories")),
+    description: v.optional(v.string()),
+    imageId: v.optional(v.id("_storage")),
+    sortOrder: v.number(),
+    isActive: v.boolean(),
+    specTemplate: v.optional(v.array(v.string())),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_parent_and_sort", ["parentId", "sortOrder"]),
+
+  // Products
+  products: defineTable({
+    name: v.string(),
+    slug: v.string(),
+    description: v.string(), // Markdown string
+    categoryId: v.id("categories"),
+    brand: v.optional(v.string()),
+    sku: v.optional(v.string()),
+    price: v.number(), // Integer in pesewas
+    salePrice: v.optional(v.number()), // Integer in pesewas
+    stock: v.number(), // Physical units on hand
+    reservedStock: v.number(), // Units reserved by unpaid orders
+    imageIds: v.array(v.id("_storage")),
+    specs: v.array(specItemValidator),
+    isActive: v.boolean(),
+    isFeatured: v.boolean(),
+    searchText: v.string(), // Maintained by code: name + brand + sku + category, lowercased
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_category_active", ["categoryId", "isActive"])
+    .index("by_active_created", ["isActive", "createdAt"])
+    .index("by_featured_active", ["isFeatured", "isActive"])
+    .index("by_sku", ["sku"])
+    .index("by_brand", ["brand"])
+    .searchIndex("search_text", {
+      searchField: "searchText",
+      filterFields: ["isActive", "categoryId"],
+    }),
+
+  // Persistent shopping carts for authenticated users
+  carts: defineTable({
+    userId: v.id("users"),
+    items: v.array(cartItemValidator),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  // Saved user delivery addresses
+  addresses: defineTable({
+    userId: v.id("users"),
+    label: v.string(),
+    recipientName: v.string(),
+    phone: v.string(),
+    line1: v.string(),
+    line2: v.optional(v.string()),
+    city: v.string(),
+    region: v.string(),
+    notes: v.optional(v.string()),
+    isDefault: v.boolean(),
+  }).index("by_user", ["userId"]),
+
+  // Customer orders
+  orders: defineTable({
+    orderNumber: v.string(), // e.g. "ORD-000123"
+    userId: v.optional(v.id("users")),
+    guestToken: v.optional(v.string()),
+    checkoutKey: v.string(), // For idempotency
+    customer: customerValidator,
+    fulfillment: fulfillmentValidator,
+    deliveryAddress: v.optional(deliveryAddressValidator),
+    deliveryZoneId: v.optional(v.id("deliveryZones")),
+    deliveryZoneName: v.optional(v.string()),
+    pickupLocationId: v.optional(v.id("pickupLocations")),
+    pickupSnapshot: v.optional(pickupSnapshotValidator),
+    items: v.array(orderItemValidator),
+    subtotal: v.number(), // Pesewas
+    deliveryFee: v.number(), // Pesewas
+    total: v.number(), // Pesewas
+    currency: v.string(), // "GHS"
+    status: orderStatusValidator,
+    paymentStatus: paymentStatusValidator,
+    paymentReferences: v.array(v.string()),
+    paidAt: v.optional(v.number()),
+    cancelReason: v.optional(v.string()),
+    needsAttention: v.boolean(),
+    attentionReason: v.optional(v.string()),
+    customerNote: v.optional(v.string()),
+    internalNote: v.optional(v.string()),
+    expiresAt: v.optional(v.number()), // Timestamp for unpaid order expiry
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_order_number", ["orderNumber"])
+    .index("by_user_created", ["userId", "createdAt"])
+    .index("by_status_created", ["status", "createdAt"])
+    .index("by_payment_status", ["paymentStatus"])
+    .index("by_checkout_key", ["checkoutKey"])
+    .index("by_email", ["customer.email"])
+    .index("by_expires_at", ["status", "expiresAt"])
+    .index("by_needs_attention", ["needsAttention"]),
+
+  // Audit trail of events and state transitions for each order
+  orderEvents: defineTable({
+    orderId: v.id("orders"),
+    type: orderEventTypeValidator,
+    fromStatus: v.optional(v.string()),
+    toStatus: v.optional(v.string()),
+    message: v.string(),
+    actorId: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index("by_order_created", ["orderId", "createdAt"]),
+
+  // Delivery zones and pricing
+  deliveryZones: defineTable({
+    name: v.string(),
+    fee: v.number(), // Pesewas
+    estimatedDays: v.string(),
+    isActive: v.boolean(),
+    sortOrder: v.number(),
+  }).index("by_active_and_sort", ["isActive", "sortOrder"]),
+
+  // In-store pickup locations
+  pickupLocations: defineTable({
+    name: v.string(),
+    address: v.string(),
+    phone: v.string(),
+    openingHours: v.string(),
+    isActive: v.boolean(),
+    sortOrder: v.number(),
+  }).index("by_active_and_sort", ["isActive", "sortOrder"]),
+
+  // Singleton site settings and storefront configuration
+  siteSettings: defineTable({
+    shopName: v.string(),
+    tagline: v.string(),
+    currency: v.string(),
+    defaultCountryCode: v.string(),
+    contactEmail: v.string(),
+    contactPhone: v.string(),
+    whatsappNumber: v.string(),
+    address: v.string(),
+    announcement: announcementValidator,
+    hero: heroSettingsValidator,
+    promoTiles: v.array(promoTileValidator),
+    freeDeliveryThreshold: v.optional(v.number()),
+    orderExpiryMinutes: v.number(),
+    lowStockThreshold: v.number(),
+    maxCartQuantity: v.number(),
+    pricesIncludeTaxNote: v.string(),
+    socialLinks: socialLinksValidator,
+  }),
+
+  // Content pages (about, terms, privacy, delivery-returns, warranty, faq)
+  pages: defineTable({
+    slug: v.string(),
+    title: v.string(),
+    body: v.string(), // Markdown
+    isPublished: v.boolean(),
+    showInFooter: v.boolean(),
+    sortOrder: v.number(),
+    updatedAt: v.number(),
+  }).index("by_slug", ["slug"]),
+
+  // Contact form submissions
+  contactMessages: defineTable({
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    message: v.string(),
+    isRead: v.boolean(),
+    createdAt: v.number(),
+  }).index("by_created", ["createdAt"]),
+
+  // Webhook and payment verification idempotency log
+  paymentEvents: defineTable({
+    eventKey: v.string(), // Unique key: reference + eventType
+    reference: v.string(),
+    eventType: v.string(),
+    receivedAt: v.number(),
+    processedAt: v.optional(v.number()),
+    outcome: v.string(),
+  })
+    .index("by_event_key", ["eventKey"])
+    .index("by_reference", ["reference"]),
+
+  // Full inventory audit trail for physical and reserved stock changes
+  stockAdjustments: defineTable({
+    productId: v.id("products"),
+    delta: v.number(), // Signed integer: + for restock, - for sale/reduction
+    reason: stockAdjustmentReasonValidator,
+    orderId: v.optional(v.id("orders")),
+    actorId: v.optional(v.string()),
+    note: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index("by_product_created", ["productId", "createdAt"]),
+
+  // Atomic sequence counters (e.g. for generating ORD-000001)
+  counters: defineTable({
+    name: v.string(),
+    value: v.number(),
+  }).index("by_name", ["name"]),
+
+  // Administrative audit trail
+  auditLogs: defineTable({
+    actorId: v.optional(v.string()),
+    action: v.string(),
+    entityType: v.string(),
+    entityId: v.string(),
+    summary: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_created", ["createdAt"])
+    .index("by_entity", ["entityType", "entityId"]),
+
+  // Transactional email dispatch log
+  emailLogs: defineTable({
+    to: v.string(),
+    template: v.string(),
+    status: v.union(v.literal("sent"), v.literal("failed")),
+    error: v.optional(v.string()),
+    orderId: v.optional(v.id("orders")),
+    createdAt: v.number(),
+  }).index("by_created", ["createdAt"]),
+});
