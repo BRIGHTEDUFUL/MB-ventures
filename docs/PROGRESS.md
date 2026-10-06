@@ -66,7 +66,8 @@
   - `docs/PROGRESS.md`
 - **New env vars**: None.
 - **New Convex functions**: None (schema and pure domain logic only).
-- **Known limitations**: `npx convex dev` needs to be linked interactively by running in terminal to deploy the schema and sync types to `convex/_generated`.
+- **Convex Status**: Fully connected to `dev:aware-cobra-407` (`mb-ventures-gh`). Schema pushed successfully; TypeScript bindings generated in `convex/_generated`.
+- **Known limitations**: None for Step 2. Ready for Phase 2 (Step 3: Authentication).
 
 ---
 
