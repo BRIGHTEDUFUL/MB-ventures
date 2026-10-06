@@ -1,2 +1,5 @@
-// crons.ts – Convex cron jobs implemented from Step 17.
-export {};
+import { cronJobs } from "convex/server";
+
+const crons = cronJobs();
+
+export default crons;
