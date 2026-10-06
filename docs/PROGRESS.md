@@ -84,7 +84,46 @@
   - `CLAUDE.md` (updated)
   - `docs/DECISIONS.md` (updated)
   - `docs/PROGRESS.md` (updated)
-- **Next up**: Can apply UI-1 (tokens, fonts, base components restyling) or continue building core capabilities in Step 3 (Authentication).
+- **Next up**: UI-1 completed. Next is Step 3 (Authentication with Convex Auth, Google OAuth & Email/Password).
+
+---
+
+### UI-1: Tokens, typography, and base components
+- **Date**: 2026-10-06
+- **What was done**:
+  - Implemented exact color tokens in `app/globals.css` and mapped to Tailwind (`bg-surface`, `bg-canvas`, `text-ink`, `text-ink-muted`, `border-line`, `border-line-strong`, `text-accent`, `bg-accent-soft`, `ring-focus`, `bg-success`, `bg-warning`, `bg-danger`).
+  - Added variable Google fonts via `next/font/google`: *Archivo* (headings 600/700), *Public Sans* (body), and *IBM Plex Mono* (code/specs/tabular prices).
+  - Applied global typography scale (display, h1 to h4, sentence case, text-wrap balance/pretty).
+  - Created `.price` tabular numeral utility and `components/shared/Price.tsx` component.
+  - Restyled base components to `docs/DESIGN.md`:
+    - `Button`: Primary, secondary, tertiary link, accent, destructive; sm (36px), md (44px), lg (52px); 6px radius; loading state prop.
+    - `Card`: 8px radius (`rounded-lg`), hairline border (`border-line`), `bg-surface`, no shadows at rest.
+    - `Badge`: 4px radius (`rounded-sm`), functional variants (sale, warning, success, secondary, destructive, outline).
+    - `Input` & `Textarea`: 44px min height, 6px radius, `border-line-strong`, `bg-surface`, visible focus ring.
+    - `Skeleton`: Static subtle block (`bg-canvas-strong`), no shimmer sweep.
+    - `Sonner`: Toasts configured at bottom-right on desktop with token styling.
+  - Purged banned styles: removed `rounded-2xl`, `rounded-full` buttons, decorative pill badges, shadows, and neon colors from `app/(store)/page.tsx`, `app/not-found.tsx`, and `app/error.tsx`.
+  - Created `/dev/design-system` preview page at [`app/dev/design-system/page.tsx`](file:///c:/Users/NHANA_K_OTTO/Desktop/Online%20Shop/app/dev/design-system/page.tsx) (enabled in development only).
+- **Files added/changed**:
+  - `app/globals.css`
+  - `tailwind.config.ts`
+  - `app/layout.tsx`
+  - `components/ui/button.tsx`
+  - `components/ui/card.tsx`
+  - `components/ui/badge.tsx`
+  - `components/ui/input.tsx`
+  - `components/ui/textarea.tsx`
+  - `components/ui/skeleton.tsx`
+  - `components/shared/Providers.tsx`
+  - `components/shared/Price.tsx`
+  - `app/(store)/page.tsx`
+  - `app/not-found.tsx`
+  - `app/error.tsx`
+  - `app/dev/design-system/page.tsx`
+  - `docs/PROGRESS.md`
+- **New env vars**: None.
+- **New Convex functions**: None.
+- **Known limitations**: None. Ready for Phase 2 (Step 3: Authentication).
 
 ---
 

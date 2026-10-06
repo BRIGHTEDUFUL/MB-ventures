@@ -1,12 +1,26 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Archivo, Public_Sans, IBM_Plex_Mono } from "next/font/google";
 import { Providers } from "@/components/shared/Providers";
 import "./globals.css";
 
-const inter = Inter({
+const fontHeading = Archivo({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-heading",
   display: "swap",
+  weight: ["600", "700"],
+});
+
+const fontSans = Public_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const fontMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -21,8 +35,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className={inter.className}>
+    <html
+      lang="en"
+      className={`${fontHeading.variable} ${fontSans.variable} ${fontMono.variable}`}
+    >
+      <body className="min-h-screen bg-surface font-sans text-ink antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

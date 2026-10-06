@@ -9,50 +9,82 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        heading: ["var(--font-heading)", "sans-serif"],
+        sans: ["var(--font-sans)", "sans-serif"],
+        mono: ["var(--font-mono)", "monospace"],
+      },
       colors: {
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+        // Design Tokens from docs/DESIGN.md
+        ink: {
+          DEFAULT: "var(--ink)",
+          muted: "var(--ink-muted)",
+          subtle: "var(--ink-subtle)",
         },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+        surface: "var(--surface)",
+        canvas: {
+          DEFAULT: "var(--canvas)",
+          strong: "var(--canvas-strong)",
         },
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+        line: {
+          DEFAULT: "var(--line)",
+          strong: "var(--line-strong)",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "var(--accent)",
+          soft: "var(--accent-soft)",
+        },
+        link: "var(--link)",
+        focus: "var(--focus)",
+        success: {
+          DEFAULT: "var(--success)",
+          soft: "var(--success-soft)",
+        },
+        warning: {
+          DEFAULT: "var(--warning)",
+          soft: "var(--warning-soft)",
+        },
+        danger: {
+          DEFAULT: "var(--danger)",
+          soft: "var(--danger-soft)",
+        },
+
+        // shadcn compatibility mapping to tokens
+        background: "var(--surface)",
+        foreground: "var(--ink)",
+        card: {
+          DEFAULT: "var(--surface)",
+          foreground: "var(--ink)",
+        },
+        popover: {
+          DEFAULT: "var(--surface)",
+          foreground: "var(--ink)",
+        },
+        primary: {
+          DEFAULT: "var(--ink)",
+          foreground: "#FFFFFF",
+        },
+        secondary: {
+          DEFAULT: "var(--canvas)",
+          foreground: "var(--ink)",
+        },
+        muted: {
+          DEFAULT: "var(--canvas)",
+          foreground: "var(--ink-muted)",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "var(--danger)",
+          foreground: "#FFFFFF",
         },
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        brand: {
-          DEFAULT: "hsl(var(--brand-primary))",
-          accent: "hsl(var(--brand-accent))",
-          dark: "hsl(var(--brand-dark))",
-        },
+        border: "var(--line)",
+        input: "var(--line-strong)",
+        ring: "var(--focus)",
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        sm: "var(--radius-sm)", // 4px
+        md: "var(--radius-md)", // 6px
+        lg: "var(--radius-lg)", // 8px
+        DEFAULT: "var(--radius-md)",
       },
     },
   },

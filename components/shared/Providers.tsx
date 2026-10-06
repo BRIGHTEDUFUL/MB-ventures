@@ -8,7 +8,13 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <ConvexClientProvider>
       {children}
-      <Toaster position="top-right" richColors closeButton />
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          className:
+            "border border-line bg-surface text-ink rounded-md shadow-md text-sm font-sans",
+        }}
+      />
     </ConvexClientProvider>
   );
 }
