@@ -12,7 +12,11 @@ import {
   Package,
   Layers,
   ShoppingBag,
+  Warehouse,
   Truck,
+  Users,
+  MessageSquare,
+  FileText,
   Settings,
   Store,
   LogOut,
@@ -42,6 +46,11 @@ const NAV_ITEMS = [
     icon: ShoppingBag,
   },
   {
+    label: "Inventory",
+    href: "/admin/inventory",
+    icon: Warehouse,
+  },
+  {
     label: "Categories",
     href: "/admin/categories",
     icon: Layers,
@@ -50,6 +59,21 @@ const NAV_ITEMS = [
     label: "Delivery & Pickup",
     href: "/admin/delivery",
     icon: Truck,
+  },
+  {
+    label: "Users",
+    href: "/admin/users",
+    icon: Users,
+  },
+  {
+    label: "Messages",
+    href: "/admin/messages",
+    icon: MessageSquare,
+  },
+  {
+    label: "Pages",
+    href: "/admin/pages",
+    icon: FileText,
   },
   {
     label: "Settings",

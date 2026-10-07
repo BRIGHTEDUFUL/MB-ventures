@@ -8,9 +8,10 @@ import { Footer } from "@/components/store/Footer";
 export const dynamic = "force-dynamic";
 
 export default async function StoreLayout({ children }: { children: ReactNode }) {
-  const [categories, settings] = await Promise.all([
+  const [categories, settings, footerPages] = await Promise.all([
     fetchQuery(api.categories.list, { parentId: null }).catch(() => []),
     fetchQuery(api.siteSettings.getPublicSettings, {}).catch(() => null),
+    fetchQuery(api.pages.listFooter, {}).catch(() => ({ pages: [] })),
   ]);
 
   const shopName = settings?.shopName || "MB Ventures GH";
@@ -33,6 +34,7 @@ export default async function StoreLayout({ children }: { children: ReactNode })
       <main className="flex-1 flex flex-col">{children}</main>
       <Footer
         categories={categories || []}
+        pages={footerPages.pages}
         shopName={shopName}
         tagline={tagline}
         supportEmail={supportEmail}

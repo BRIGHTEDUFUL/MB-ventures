@@ -22,6 +22,7 @@ interface FooterProps {
     name: string;
     slug: string;
   }>;
+  pages: Array<{ slug: string; title: string }>;
 }
 
 export function Footer({
@@ -32,8 +33,14 @@ export function Footer({
   whatsappNumber,
   address,
   categories,
+  pages,
 }: FooterProps) {
   const currentYear = new Date().getFullYear();
+  // Terms and privacy sit in the sub-footer; every other footer page sits in
+  // Help & Support. Unpublished pages simply leave no link behind.
+  const infoPages = pages.filter((page) => page.slug !== "terms" && page.slug !== "privacy");
+  const termsPage = pages.find((page) => page.slug === "terms");
+  const privacyPage = pages.find((page) => page.slug === "privacy");
 
   return (
     <footer className="bg-canvas border-t border-line text-ink mt-auto">
@@ -171,20 +178,17 @@ export function Footer({
                 </Link>
               </li>
               <li>
-                <Link href="/delivery" className="hover:text-ink transition-colors">
-                  Delivery Zones & Rates
+                <Link href="/contact" className="hover:text-ink transition-colors">
+                  Contact us
                 </Link>
               </li>
-              <li>
-                <Link href="/pickup" className="hover:text-ink transition-colors">
-                  Store Pickup Info
-                </Link>
-              </li>
-              <li>
-                <Link href="/warranty" className="hover:text-ink transition-colors">
-                  Warranty & Returns
-                </Link>
-              </li>
+              {infoPages.map((page) => (
+                <li key={page.slug}>
+                  <Link href={`/${page.slug}`} className="hover:text-ink transition-colors">
+                    {page.title}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -223,14 +227,20 @@ export function Footer({
           <p>
             © {currentYear} {shopName || "MB Ventures GH"}. All rights reserved.
           </p>
-          <div className="flex items-center gap-4 text-xs">
-            <Link href="/terms" className="hover:text-ink">
-              Terms of Service
-            </Link>
-            <Link href="/privacy" className="hover:text-ink">
-              Privacy Policy
-            </Link>
-          </div>
+          {(termsPage || privacyPage) && (
+            <div className="flex items-center gap-4 text-xs">
+              {termsPage && (
+                <Link href={`/${termsPage.slug}`} className="hover:text-ink">
+                  {termsPage.title}
+                </Link>
+              )}
+              {privacyPage && (
+                <Link href={`/${privacyPage.slug}`} className="hover:text-ink">
+                  {privacyPage.title}
+                </Link>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </footer>

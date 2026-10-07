@@ -36,7 +36,8 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_email", ["email"])
-    .index("by_role", ["role"]),
+    .index("by_role", ["role"])
+    .index("by_created", ["createdAt"]),
 
   // Product categories (supports up to two levels via parentId)
   categories: defineTable({
@@ -247,7 +248,9 @@ export default defineSchema({
     message: v.string(),
     isRead: v.boolean(),
     createdAt: v.number(),
-  }).index("by_created", ["createdAt"]),
+  })
+    .index("by_created", ["createdAt"])
+    .index("by_email_created", ["email", "createdAt"]),
 
   // Full inventory audit trail for physical and reserved stock changes
   stockAdjustments: defineTable({
@@ -258,7 +261,7 @@ export default defineSchema({
     actorId: v.optional(v.string()),
     note: v.optional(v.string()),
     createdAt: v.number(),
-  }).index("by_product_created", ["productId", "createdAt"]),
+  }).index("by_product_created", ["productId", "createdAt"]).index("by_created", ["createdAt"]).index("by_reason_created", ["reason", "createdAt"]),
 
   // Atomic sequence counters (e.g. for generating ORD-000001)
   counters: defineTable({

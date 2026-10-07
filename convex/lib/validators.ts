@@ -77,6 +77,7 @@ export const stockAdjustmentReasonValidator = v.union(
   v.literal("manual"),
   v.literal("restock"),
   v.literal("cancel_restock"),
+  v.literal("damage_loss"),
   v.literal("import"),
   v.literal("correction")
 );

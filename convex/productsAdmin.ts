@@ -369,34 +369,63 @@ export const update = mutation({
 });
 
 /**
- * Admin Mutation: Quick physical stock adjustment with reason note.
+ * Admin Mutation: adjust physical stock, either by setting an absolute value or by
+ * applying a signed delta. Stock can never drop below what pending orders have reserved.
  */
 export const adjustStock = mutation({
   args: {
     productId: v.id("products"),
-    newPhysicalStock: v.number(),
-    reason: v.union(v.literal("manual"), v.literal("restock"), v.literal("correction")),
+    mode: v.union(v.literal("set"), v.literal("add")),
+    value: v.number(), // set: new physical stock; add: signed delta
+    reason: v.union(
+      v.literal("manual"),
+      v.literal("restock"),
+      v.literal("correction"),
+      v.literal("damage_loss")
+    ),
     note: v.optional(v.string()),
   },
+  returns: v.object({
+    success: v.literal(true),
+    stock: v.number(),
+    reserved: v.number(),
+    available: v.number(),
+  }),
   handler: async (ctx, args) => {
+    // TODO(audit): Step 25 writes an auditLogs row for this stock adjustment.
     const { user } = await requireAdmin(ctx);
+
+    const note = args.note?.trim();
+    if (note && note.length > 500) {
+      throw new Error("Note must be 500 characters or fewer.");
+    }
 
     const product = await ctx.db.get(args.productId);
     if (!product) throw new Error("Product not found.");
 
-    if (args.newPhysicalStock < product.reservedStock) {
+    const finalStock = args.mode === "set" ? args.value : product.stock + args.value;
+
+    if (!Number.isInteger(finalStock)) {
+      throw new Error("Stock must be a whole number of units.");
+    }
+    if (finalStock < 0) {
+      throw new Error("Stock cannot be negative.");
+    }
+    if (finalStock < product.reservedStock) {
       throw new Error(
-        `Cannot set stock to ${args.newPhysicalStock}. At least ${product.reservedStock} units are reserved by pending orders.`
+        `Cannot set stock to ${finalStock}. At least ${product.reservedStock} units are reserved by pending orders.`
       );
     }
 
-    const delta = args.newPhysicalStock - product.stock;
-    if (delta === 0) return { success: true };
+    const delta = finalStock - product.stock;
+    const reserved = product.reservedStock;
+    const available = finalStock - reserved;
+    if (delta === 0) return { success: true as const, stock: finalStock, reserved, available };
 
     const now = Date.now();
 
     await ctx.db.patch(product._id, {
-      stock: args.newPhysicalStock,
+      stock: finalStock,
       updatedAt: now,
     });
 
@@ -405,11 +434,11 @@ export const adjustStock = mutation({
       delta,
       reason: args.reason,
       actorId: String(user._id),
-      note: args.note?.trim() || `Stock adjusted from ${product.stock} to ${args.newPhysicalStock}`,
+      note: note || undefined,
       createdAt: now,
     });
 
-    return { success: true };
+    return { success: true as const, stock: finalStock, reserved, available };
   },
 });
 

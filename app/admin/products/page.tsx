@@ -46,7 +46,9 @@ export default function AdminProductsPage() {
   const [stockDialogOpen, setStockDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductRow | null>(null);
   const [newStockValue, setNewStockValue] = useState<number>(0);
-  const [stockReason, setStockReason] = useState<"restock" | "manual" | "correction">("restock");
+  const [stockReason, setStockReason] = useState<
+    "restock" | "manual" | "correction" | "damage_loss"
+  >("restock");
   const [stockNote, setStockNote] = useState("");
   const [isAdjusting, setIsAdjusting] = useState(false);
 
@@ -81,7 +83,8 @@ export default function AdminProductsPage() {
     try {
       await adjustStock({
         productId: selectedProduct._id,
-        newPhysicalStock: newStockValue,
+        mode: "set",
+        value: newStockValue,
         reason: stockReason,
         note: stockNote.trim() || undefined,
       });
@@ -437,13 +440,16 @@ export default function AdminProductsPage() {
                 <select
                   value={stockReason}
                   onChange={(e) =>
-                    setStockReason(e.target.value as "restock" | "manual" | "correction")
+                    setStockReason(
+                      e.target.value as "restock" | "manual" | "correction" | "damage_loss"
+                    )
                   }
                   className="w-full h-11 px-3 rounded-md border border-line-strong bg-surface text-xs text-ink"
                 >
                   <option value="restock">New Shipment / Restock</option>
                   <option value="manual">Manual Adjustment</option>
                   <option value="correction">Inventory Audit Correction</option>
+                  <option value="damage_loss">Damage or Loss</option>
                 </select>
               </div>
 

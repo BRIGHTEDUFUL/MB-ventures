@@ -2,18 +2,18 @@
 
 ## Current status
 
-**Completed and pushed to `origin/main` on 2026-10-07.** The latest task (Step 10, delivery, pickup and site settings) is finished and verified. The sign-up blocker found while verifying it is fixed in its own commit (`fix(auth)`), separate from Step 10.
+**Completed and pushed to `origin/main` on 2026-10-07.** The latest tasks (Steps 22 and 23 — users and inventory admin, pages and contact) are finished and verified. Earlier work on the same day: Step 10 (delivery, pickup and site settings), the sign-up blocker fix (`fix(auth)`), and Step 9 (Slate & Cobalt redesign).
 
 | Check | Result |
 | --- | --- |
 | `npx tsc --noEmit` | 0 errors |
 | `npm run lint` | 0 warnings, 0 errors |
-| `npm run build` | passes — all 26 routes + middleware |
+| `npm run build` | passes — all 37 routes + middleware |
 | `npm test` | placeholder only (`Step 26 will configure tests`); no test files exist |
-| Lighthouse on `/` | accessibility 100, best-practices 100, SEO 100, 0 failures |
+| Lighthouse on `/` (Step 9) | accessibility 100, best-practices 100, SEO 100, 0 failures |
 | Horizontal overflow | none on `/`, `/catalog`, `/product/[slug]`, `/admin/delivery` or `/admin/settings` |
-| Banned lists in `docs/DESIGN.md` | 0 matches (visual and copy sweeps) |
-| Manual browser pass | sign-up → admin login, `/admin/delivery` create/reorder/delete, `/admin/settings` save/discard/validation + `beforeunload` guard |
+| Banned lists in `docs/DESIGN.md` | 0 matches (visual and copy sweeps, re-run over all Step 22/23 files) |
+| Manual browser pass | Steps 22+23: `/admin/users` role change + search, `/admin/inventory` adjust/history/CSV, `/admin/pages` publish → live route, `/admin/messages` inbox, `/contact` rate limit, footer links → 200s, 12-route console sweep = 0 errors |
 
 Known gaps carried forward (reported, not silently rewritten):
 
@@ -532,6 +532,57 @@ Known gaps carried forward (reported, not silently rewritten):
 
 ---
 
+### Steps 22 & 23: Users and inventory admin, pages and contact
+
+- **Date**: 2026-10-07
+- **Status**: Completed.
+- **How it was run**: The two steps were executed together as a 9-agent parallel team (4 backend agents, 5 frontend agents) around a pinned API contract (`contract-steps22-23.md`, kept in the temp workspace) with strict file ownership per agent, then integrated and verified by hand. Phase 0 (schema indexes, `damage_loss` reason, contract file) was done by the integrator before dispatch.
+- **What was done**:
+  1. **Users admin backend** (`convex/usersAdmin.ts`): `adminList` (search by name/email, role filter, newest-first, capped at 1000 rows), `adminGet` (profile + order stats), `adminUpdateRole` (role change with a self-demote guard — the caller can never demote themselves — and a last-admin guard), and `anonymize` (internalMutation: strips name/email/phone from the user **and clears order PII** — `deliveryAddress`, `momoPhone`, `customerNote`, `internalNote`, `guestToken` — so removed accounts leave no personal data behind).
+  2. **Users admin UI** (`app/admin/users`, `components/admin/users/`): list with search box, role filter, role-change menu (promote/demote; self row disabled with helper text), empty/loading/mutation-error states, and a detail page `[id]` with profile, order stats and an anonymize flow behind `ConfirmDialog`.
+  3. **Inventory admin** (`convex/inventoryAdmin.ts`): `list` (products with `stock`/`reservedStock`/available, status and category filters, sort), `stockHistory` (per-product adjustment history), `recentMovements` (cross-product feed), `exportRows` (CSV data). `productsAdmin.adjustStock` extended with `mode: "set" | "add"` and the `damage_loss` reason. UI (`app/admin/inventory`, `components/admin/inventory/`): table with Low/Out badges, adjust popover with live available preview and a server-enforced `Stock cannot be negative.` guard, history drawer showing `−1 Correction by Admin`, movements tab, and a CSV export.
+  4. **Pages admin** (`convex/pages.ts`, `pagesAdmin.ts`, `lib/pageDrafts.ts`, `lib/reservedSlugs.ts`): public `listFooter` / `getBySlug` (published only), admin `list` / `get` / `create` / `update` / `remove` with reserved-slug validation (`about`, `faq`, `terms`, `privacy`, `warranty`, `contact`, `delivery`, `pickup`, `checkout`, `cart`, plus `catalog` and `orders` — real routes, documented deviation). `pagesAdmin.get` was added beyond the pinned contract: without it the editor could not load a draft body (found and fixed during verification — the first handler returned the raw document and failed Convex's `ReturnsValidationError` on `_creationTime`, now returns explicitly mapped fields).
+  5. **Page content** (`convex/pagesSeed.ts`): `seedDrafts` internalMutation seeds six drafts idempotently — About us, Delivery and returns, Warranty, FAQ, Terms, Privacy. UI (`app/admin/pages`, `components/admin/pages/`): list with Published / In footer columns, new/edit editor with slug rules, a review banner (`[BRACKETS]` placeholders must be replaced), and interlocked publish + footer switches. Seeded in dev and verified idempotent; all six were then published through the UI for testing.
+  6. **Contact form** (`convex/contactMessages.ts`, `app/(store)/contact`, `components/store/ContactForm.tsx`): public mutation with a honeypot field (bots are dropped silently) and an in-mutation cap of **3 messages per email per hour**; each insert schedules `notifyShop` (internalAction stub with `TODO(email)` until Step 20 — no `RESEND_API_KEY` yet). Success replaces the form with an inline confirmation; rate-limit and server errors surface as sonner toasts.
+  7. **Messages inbox** (`convex/contactAdmin.ts`, `app/admin/messages`, `components/admin/messages/`): list with unread-only filter and pagination, detail page with Read/Unread toggle, Delete behind `ConfirmDialog`, and a `mailto:` Reply whose subject is prefilled (`Re: your message to MB Ventures GH`).
+  8. **Public `[slug]` route + footer** (`app/(store)/[slug]/page.tsx`, `components/store/Markdown.tsx`, `components/store/Footer.tsx`, `app/(store)/layout.tsx`): server component with `force-dynamic`, `notFound()` for unknown or reserved slugs (reserved list duplicated as a local const — Convex files are not importable from `app/`), markdown body rendered through a new `Markdown` component that sanitises links (http/https/mailto/tel/relative only), "Last updated" line, and metadata from the first ~150 chars. The footer's five dead hardcoded links (`/delivery`, `/pickup`, `/warranty`, `/terms`, `/privacy`) were replaced with the data-driven `pages` prop; a "Contact us" link was added under Help & Support. Repo grep now finds zero hardcoded policy hrefs.
+  9. **Integrator fixes**: `app/admin/products/page.tsx` stock dialog migrated to the new `adjustStock` args (added `damage_loss` option); `pagesAdmin.get` implemented; a `bodyUnavailable` dead path removed from PageEditor/MarkdownField; two em dashes in UI strings reworded (DESIGN.md ban); admin nav extended with Inventory / Users / Messages / Pages.
+- **Files added**:
+  - `convex/usersAdmin.ts`, `convex/inventoryAdmin.ts`, `convex/pages.ts`, `convex/pagesAdmin.ts`, `convex/pagesSeed.ts`, `convex/contactMessages.ts`, `convex/contactAdmin.ts`, `convex/lib/pageDrafts.ts`, `convex/lib/reservedSlugs.ts`
+  - `app/(store)/[slug]/page.tsx`, `app/(store)/contact/page.tsx`
+  - `app/admin/users/page.tsx`, `app/admin/users/[id]/page.tsx`, `app/admin/inventory/page.tsx`, `app/admin/pages/page.tsx`, `app/admin/pages/[id]/page.tsx`, `app/admin/pages/new/page.tsx`, `app/admin/messages/page.tsx`, `app/admin/messages/[id]/page.tsx`
+  - `components/admin/users/*`, `components/admin/inventory/*`, `components/admin/pages/*`, `components/admin/messages/*`
+  - `components/store/ContactForm.tsx`, `components/store/Markdown.tsx`
+- **Files changed**: `convex/schema.ts` (4 indexes), `convex/lib/validators.ts` (`damage_loss`), `convex/productsAdmin.ts` (`adjustStock` mode + reason), `convex/_generated/api.d.ts` (codegen), `app/admin/layout.tsx` (nav), `app/admin/products/page.tsx` (stock dialog migration), `app/(store)/layout.tsx` (footer pages prop), `components/store/Footer.tsx` (data-driven links), `docs/PROGRESS.md`.
+- **New env vars**: None. (`RESEND_API_KEY` is still required for the contact notification — Steps 20/21.)
+- **New Convex functions**: 23 (appended to the inventory below): 4 in `usersAdmin`, 4 in `inventoryAdmin`, 2 in `pages`, 5 in `pagesAdmin`, 1 in `pagesSeed`, 3 in `contactMessages`, 4 in `contactAdmin`. `productsAdmin.adjustStock` was extended (existing function).
+- **Documented deviations from the build pack**:
+  1. `@convex-dev/rate-limiter` **not installed** — the contact form uses an in-mutation per-email hourly cap (3/hour) plus a honeypot instead. AGENTS.md forbids adding libraries unnecessarily; the pack says "use the component now if installed". Step 25 installs it properly.
+  2. Privacy policy content describes this shop's real stack (manual MoMo, cash on delivery, pay in store) — the pack's text says Paystack, which this project removed.
+  3. Contact email notification is a scheduled stub with `TODO(email)` until Step 20 (no `RESEND_API_KEY`).
+  4. No Step 17 "tools" link on `/admin/inventory` (Step 17 not built yet).
+  5. No sitemap changes (`app/sitemap.ts` arrives with Step 24).
+  6. Reserved-slug list = pack's list + `catalog` and `orders`, which are real routes.
+- **Verification**:
+  - `npx convex dev --once` → functions pushed to `dev:aware-cobra-407`; `npx tsc --noEmit` → 0 errors; `npm run lint` → 0 warnings, 0 errors; `npm run build` → passes, all 37 routes + middleware (dev server stopped first); `npm test` → placeholder, no test files; `pagesSeed.seedDrafts` re-run → idempotent (no duplicates).
+  - Browser — `/admin/inventory`: adjust "Set" 6 → 5 with a note → Low badge appears; history drawer shows `−1 Correction by …`; movements tab lists the change; negative value blocked with `Stock cannot be negative.`; CSV export downloads; stock later restored to 6 through the same UI.
+  - Browser — `/admin/users`: search `customer` → 1 row, `zzzznomatch` → empty state; promote → demote cycle on a QA customer; self-demote entry disabled with helper text; detail page renders with empty states.
+  - Browser — `/admin/pages`: About edited → published → `/about` returns 200; remaining five published through the UI; all six show Published + In footer; unpublished slug correctly 404s; footer renders About us / Delivery and returns / Warranty / FAQ (Help & Support) and Terms / Privacy (sub-footer).
+  - Browser — `/contact`: 3 submissions → inline success each time; 4th → `You have sent 3 messages recently. Please wait a little before sending another.` (test messages were then deleted).
+  - Browser — `/admin/messages`: rows with unread markers, unread-only filter (2 rows → 1 after marking one read), detail page, Mark read/Unread toggle, Delete → confirm dialog → toast `Message deleted.` → not-found state, Reply `mailto:` with prefilled subject, empty state `No messages yet`.
+  - Console-error sweep over 12 routes (`/`, `/about`, `/terms`, `/privacy`, `/faq`, `/contact`, `/sign-up`, `/admin`, `/admin/users`, `/admin/inventory`, `/admin/pages`, `/admin/messages`) → **0 errors**. DESIGN.md banned-list sweeps over all new files → 0 UI hits.
+- **Known limitations / reported, not fixed**:
+  - `usersAdmin.adminList` search and list are capped at the first 1000 users; `inventoryAdmin.list` at 2000 products (protects the query from unbounded scans; no pagination UI yet).
+  - The reserved-slug list exists twice — `convex/lib/reservedSlugs.ts` and a local const in `app/(store)/[slug]/page.tsx` — because Convex modules cannot be imported from `app/`. Any change must touch both.
+  - The last-admin demote guard is unreachable defence-in-depth while the self-demote guard exists (target ≠ caller implies ≥2 admins). Kept as written in the contract.
+  - The inventory "cannot go below reserved stock" branch could not be exercised — no dev order holds a reservation (same limitation as Step 10's deactivate branch).
+  - The six content pages are **published in dev with `[BRACKETS]` placeholder text**; they must be reviewed/replaced or unpublished before production.
+  - `usersAdmin.anonymize` is an internalMutation only (no admin UI); invoke with `npx convex run usersAdmin:anonymize '{ userId: "…" }'` until an admin flow is specified.
+  - Test accounts left in the dev deployment: `qa.admin@mbventuresgh.test` (admin) and `qa.customer@mbventuresgh.test` (customer) — recommended for deletion after manual testing.
+  - Steps 4–8 still have no PROGRESS entry (carried forward); the Convex function inventory below was stale since Step 2 and now lists Steps 7, 10 and 22/23 but still omits `categoriesAdmin`, `productsAdmin`, `files`, `addresses` and others.
+
+---
+
 ## Convex function inventory
 
 | Name | Type | Access | Purpose |
@@ -577,4 +628,27 @@ Known gaps carried forward (reported, not silently rewritten):
 | `fulfillment.togglePickupLocationActive` | mutation | admin | Show or hide a pickup location on the storefront |
 | `siteSettings.getAdmin` | query | admin | Full settings singleton with storage image URLs resolved |
 | `siteSettings.update` | mutation | admin | Partial, validated settings update; removes replaced images |
+| `usersAdmin.adminList` | query | admin | Search and filter users by name, email or role (capped at 1000) |
+| `usersAdmin.adminGet` | query | admin | Single user profile with order stats for the detail page |
+| `usersAdmin.adminUpdateRole` | mutation | admin | Change a user's role; blocks self-demotion and removing the last admin |
+| `usersAdmin.anonymize` | internalMutation | internal | Strip personal data from a user and their orders |
+| `inventoryAdmin.list` | query | admin | Products with available stock, filters and sorting (capped at 2000) |
+| `inventoryAdmin.stockHistory` | query | admin | Stock adjustment history for one product |
+| `inventoryAdmin.recentMovements` | query | admin | Recent stock movements across all products |
+| `inventoryAdmin.exportRows` | query | admin | Row data backing the inventory CSV export |
+| `pages.listFooter` | query | public | Published pages flagged for the storefront footer |
+| `pages.getBySlug` | query | public | One published content page by slug (null → 404) |
+| `pagesAdmin.list` | query | admin | All content pages including drafts |
+| `pagesAdmin.get` | query | admin | Single page with body for the editor (field-mapped) |
+| `pagesAdmin.create` | mutation | admin | Create a page with reserved-slug validation |
+| `pagesAdmin.update` | mutation | admin | Update page content, slug, publish state and footer flag |
+| `pagesAdmin.remove` | mutation | admin | Delete a content page |
+| `pagesSeed.seedDrafts` | internalMutation | internal | Idempotently seed the six content-page drafts |
+| `contactMessages.create` | mutation | public | Store a contact message (honeypot + 3 per email per hour) |
+| `contactMessages.getMessage` | internalQuery | internal | Read one message for the notification action |
+| `contactMessages.notifyShop` | internalAction | internal | Schedule/shop email stub — `TODO(email)` until Step 20 |
+| `contactAdmin.list` | query | admin | Inbox listing with unread filter and pagination |
+| `contactAdmin.get` | query | admin | Single contact message for the detail page |
+| `contactAdmin.setRead` | mutation | admin | Mark a message read or unread |
+| `contactAdmin.remove` | mutation | admin | Delete a contact message |
 
