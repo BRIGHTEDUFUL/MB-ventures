@@ -276,8 +276,34 @@
   - `siteSettings.getPublicSettings` — public query
   - `seed.seedDemoData` — public mutation (safe idempotent seeder)
 - **Known limitations**:
-  - Cart drawer and full checkout flow are in subsequent steps (Step 5 / UI-11).
-  - Individual Category and Product detail pages are ready for dedicated page routes in Step 5.
+  - Cart drawer and full checkout flow are in subsequent steps (Step 6 / UI-11).
+  - Dedicated cart storage mutation will be wired in Step 6.
+
+---
+
+### Step 5: Catalog Listing, Category Pages, and Product Detail Pages
+- **Date**: 2026-10-07
+- **What was done**:
+  - Implemented `products.listAll` (with sorting by latest, price low-to-high, price high-to-low, and category filtering) and `products.listRelated` in `convex/products.ts`.
+  - Created [`app/(store)/catalog/page.tsx`](file:///c:/Users/NHANA_K_OTTO/Desktop/Online%20Shop/app/(store)/catalog/page.tsx) — complete catalog browser with category filter tabs, sort dropdown, responsive product grid (2-col mobile, 3-col tablet, 4-col desktop), breadcrumbs, search integration, and empty state.
+  - Created [`app/(store)/category/[slug]/page.tsx`](file:///c:/Users/NHANA_K_OTTO/Desktop/Online%20Shop/app/(store)/category/[slug]/page.tsx) — dynamic category route with SEO metadata generation (`generateMetadata`), breadcrumbs, category banner, and product listing grid.
+  - Created [`components/store/ProductGallery.tsx`](file:///c:/Users/NHANA_K_OTTO/Desktop/Online%20Shop/components/store/ProductGallery.tsx) — product photo gallery with flat canvas container, sale/stock badges, thumbnail selectors, and priority image loading.
+  - Created [`components/store/ProductActions.tsx`](file:///c:/Users/NHANA_K_OTTO/Desktop/Online%20Shop/components/store/ProductActions.tsx) — quantity stepper (- / +), primary "Add to Cart" button (44px+ height, active state, Sonner toast notification), "Buy Now" direct checkout trigger, and WhatsApp inquiry button.
+  - Created [`app/(store)/product/[slug]/page.tsx`](file:///c:/Users/NHANA_K_OTTO/Desktop/Online%20Shop/app/(store)/product/[slug]/page.tsx) — complete Product Detail Page with dynamic SEO metadata, brand & SKU mono headers, tabular price formatting, stock availability badge, gallery, purchase actions, Accra delivery and Circle store pickup facts, product description, structured technical specifications table, and related products grid.
+- **Files added/changed**:
+  - `convex/products.ts`
+  - `app/(store)/catalog/page.tsx` (new)
+  - `app/(store)/category/[slug]/page.tsx` (new)
+  - `components/store/ProductGallery.tsx` (new)
+  - `components/store/ProductActions.tsx` (new)
+  - `app/(store)/product/[slug]/page.tsx` (new)
+  - `docs/PROGRESS.md`
+- **New Convex functions**:
+  - `products.listAll` — public query
+  - `products.listRelated` — public query
+- **Known limitations**:
+  - Persistent cart state for authenticated users and local storage cart for guests are coming in Step 6 (Cart & Checkout).
+- **Verification**: `npx tsc --noEmit` passed (0 errors), `next lint` passed (0 warnings), `next build` compiled all dynamic routes.
 
 ---
 
@@ -290,9 +316,11 @@
 | `users.createUser` | internalMutation | internal | Called by Convex Auth on signup to set role + timestamps |
 | `categories.list` | query | public | List active categories or subcategories |
 | `categories.getBySlug` | query | public | Get category by slug with subcategories |
+| `products.listAll` | query | public | List all active products with category & price sorting |
 | `products.listFeatured` | query | public | List featured active products with pricing & stock info |
 | `products.listLatest` | query | public | List latest active products |
 | `products.listByCategory` | query | public | List products in a category |
+| `products.listRelated` | query | public | List related products in the same category |
 | `products.getBySlug` | query | public | Get single product by slug |
 | `products.search` | query | public | Full-text search products by query |
 | `siteSettings.getPublicSettings` | query | public | Return store branding, contact, MoMo accounts, and zones |

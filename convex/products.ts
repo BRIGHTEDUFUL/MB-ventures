@@ -30,6 +30,54 @@ async function enrichProduct(
 }
 
 /**
+ * List all active products with optional category and search filtering.
+ */
+export const listAll = query({
+  args: {
+    categorySlug: v.optional(v.string()),
+    sortBy: v.optional(v.union(v.literal("latest"), v.literal("price_asc"), v.literal("price_desc"))),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    let category = null;
+    if (args.categorySlug) {
+      category = await ctx.db
+        .query("categories")
+        .withIndex("by_slug", (q) => q.eq("slug", args.categorySlug!))
+        .first();
+    }
+
+    let products;
+    if (category) {
+      products = await ctx.db
+        .query("products")
+        .withIndex("by_category_active", (q) =>
+          q.eq("categoryId", category._id).eq("isActive", true)
+        )
+        .collect();
+    } else {
+      products = await ctx.db
+        .query("products")
+        .withIndex("by_active_created", (q) => q.eq("isActive", true))
+        .order("desc")
+        .collect();
+    }
+
+    if (args.sortBy === "price_asc") {
+      products.sort((a, b) => effectivePrice(a) - effectivePrice(b));
+    } else if (args.sortBy === "price_desc") {
+      products.sort((a, b) => effectivePrice(b) - effectivePrice(a));
+    }
+
+    if (args.limit) {
+      products = products.slice(0, args.limit);
+    }
+
+    return Promise.all(products.map((p) => enrichProduct(ctx, p)));
+  },
+});
+
+/**
  * List featured products for the storefront homepage.
  */
 export const listFeatured = query({
@@ -100,6 +148,29 @@ export const listByCategory = query({
       category,
       products: enriched,
     };
+  },
+});
+
+/**
+ * List related products within the same category.
+ */
+export const listRelated = query({
+  args: {
+    productId: v.id("products"),
+    categoryId: v.id("categories"),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 4;
+    const products = await ctx.db
+      .query("products")
+      .withIndex("by_category_active", (q) =>
+        q.eq("categoryId", args.categoryId).eq("isActive", true)
+      )
+      .filter((q) => q.neq(q.field("_id"), args.productId))
+      .take(limit);
+
+    return Promise.all(products.map((p) => enrichProduct(ctx, p)));
   },
 });
 
