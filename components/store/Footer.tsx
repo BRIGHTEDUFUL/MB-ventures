@@ -95,7 +95,7 @@ export function Footer({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
-            <Logo size="md" variant="text" className="" />
+            <Logo size="md" variant="full" className="" />
             <p className="text-xs text-ink-muted leading-relaxed max-w-sm">
               {tagline ||
                 "Specialist supplier of ergonomic workspace seating, motorized standing desks, mechanical peripherals, and high-performance computing hardware in Accra, Ghana."}

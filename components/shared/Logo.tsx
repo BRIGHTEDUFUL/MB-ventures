@@ -27,14 +27,14 @@ export function Logo({
 }: LogoProps) {
   const heightClass = sizeClasses[size];
 
-  // Logo with full branding (image + text fallback)
+  // Logo with full branding (image)
   if (variant === "full") {
     const content = (
       <div className={cn("flex items-center gap-2.5 group", className)}>
-        {/* Logo Image - will use public/mb-ventures-logo.png when available */}
+        {/* Logo Image */}
         <div className={cn("relative transition-transform duration-200 group-hover:scale-105", heightClass)}>
           <Image
-            src="/mb-ventures-logo.png"
+            src="/mb-ventures-logo.jpeg"
             alt="MB Ventures GH"
             width={200}
             height={64}
