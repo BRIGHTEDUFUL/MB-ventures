@@ -1,58 +1,76 @@
 /**
- * Order status state machine.
+ * Order status state machine for MB Ventures GH.
  *
- * Rules:
- * - pending_payment -> paid | cancelled
- * - paid -> processing | cancelled
- * - processing -> ready_for_pickup (pickup only) | out_for_delivery (delivery only) | cancelled
- * - ready_for_pickup -> completed | cancelled
- * - out_for_delivery -> completed | cancelled
- * - completed and cancelled are final (no transitions allowed)
+ * Payment model summary:
+ *   momo            → customer sends MoMo manually → submits reference → admin verifies
+ *   cash_on_delivery → payment collected on delivery (no upfront payment)
+ *   pay_in_store    → payment collected at pickup counter (no upfront payment)
+ *
+ * Valid status transitions:
+ *
+ *  [MoMo orders]
+ *    pending → awaiting_momo → pending_verification → processing
+ *
+ *  [COD / pay-in-store orders]
+ *    pending → processing
+ *
+ *  [All orders, once processing]
+ *    processing → ready_for_pickup  (pickup fulfillment)
+ *    processing → out_for_delivery  (delivery fulfillment)
+ *    ready_for_pickup → completed
+ *    out_for_delivery → completed
+ *
+ *  [Any non-terminal status]
+ *    any → cancelled
+ *
+ *  [Terminal states — no further transitions]
+ *    completed, cancelled
  */
 
-import type { FulfillmentType, OrderStatus } from "./constants";
+import type { FulfillmentType, OrderStatus, PaymentMethod } from "./constants";
 
 /**
- * Returns whether a transition from one status to another is valid given the order's fulfillment type.
+ * Returns whether a transition from one status to another is valid
+ * given the order's fulfillment type and payment method.
  */
 export function canTransition(
   from: OrderStatus,
   to: OrderStatus,
-  fulfillment: FulfillmentType
+  fulfillment: FulfillmentType,
+  paymentMethod: PaymentMethod
 ): boolean {
-  if (from === to) {
-    return false;
-  }
+  if (from === to) return false;
 
-  // Completed and cancelled are final terminal states
-  if (from === "completed" || from === "cancelled") {
-    return false;
-  }
+  // Terminal states — no further transitions allowed
+  if (from === "completed" || from === "cancelled") return false;
+
+  // Cancellation is always allowed from any non-terminal state
+  if (to === "cancelled") return true;
 
   switch (from) {
-    case "pending_payment":
-      return to === "paid" || to === "cancelled";
+    case "pending":
+      if (paymentMethod === "momo") return to === "awaiting_momo";
+      // COD and pay-in-store skip straight to processing
+      return to === "processing";
 
-    case "paid":
-      return to === "processing" || to === "cancelled";
+    case "awaiting_momo":
+      // Admin or customer submits reference → moves to verification queue
+      return to === "pending_verification";
+
+    case "pending_verification":
+      // Admin confirms MoMo transfer received → order enters processing
+      return to === "processing";
 
     case "processing":
-      if (to === "cancelled") return true;
-      if (fulfillment === "pickup") {
-        return to === "ready_for_pickup";
-      }
-      if (fulfillment === "delivery") {
-        return to === "out_for_delivery";
-      }
+      if (fulfillment === "pickup") return to === "ready_for_pickup";
+      if (fulfillment === "delivery") return to === "out_for_delivery";
       return false;
 
     case "ready_for_pickup":
-      // Only applicable for pickup orders
-      return to === "completed" || to === "cancelled";
+      return to === "completed";
 
     case "out_for_delivery":
-      // Only applicable for delivery orders
-      return to === "completed" || to === "cancelled";
+      return to === "completed";
 
     default:
       return false;
@@ -65,38 +83,68 @@ export function canTransition(
 export function allowedNextStatuses(order: {
   status: OrderStatus;
   fulfillment: FulfillmentType;
+  paymentMethod: PaymentMethod;
 }): OrderStatus[] {
-  const { status, fulfillment } = order;
+  const { status, fulfillment, paymentMethod } = order;
+
+  if (status === "completed" || status === "cancelled") return [];
+
+  // Build forward targets (excluding cancel — always appended below)
+  let forward: OrderStatus[] = [];
 
   switch (status) {
-    case "pending_payment":
-      return ["paid", "cancelled"];
-
-    case "paid":
-      return ["processing", "cancelled"];
-
+    case "pending":
+      forward = paymentMethod === "momo" ? ["awaiting_momo"] : ["processing"];
+      break;
+    case "awaiting_momo":
+      forward = ["pending_verification"];
+      break;
+    case "pending_verification":
+      forward = ["processing"];
+      break;
     case "processing":
-      if (fulfillment === "pickup") {
-        return ["ready_for_pickup", "cancelled"];
-      }
-      return ["out_for_delivery", "cancelled"];
-
+      forward = fulfillment === "pickup"
+        ? ["ready_for_pickup"]
+        : ["out_for_delivery"];
+      break;
     case "ready_for_pickup":
-      return ["completed", "cancelled"];
-
     case "out_for_delivery":
-      return ["completed", "cancelled"];
-
-    case "completed":
-    case "cancelled":
-    default:
-      return [];
+      forward = ["completed"];
+      break;
   }
+
+  return [...forward, "cancelled"];
 }
 
 /**
- * Helper to determine if an order is in a terminal state
+ * Returns true if the status is terminal (no further transitions possible).
  */
 export function isTerminalStatus(status: OrderStatus): boolean {
   return status === "completed" || status === "cancelled";
+}
+
+/**
+ * Returns true if the order is waiting for the admin to act on a MoMo reference.
+ */
+export function needsMomoVerification(status: OrderStatus): boolean {
+  return status === "pending_verification";
+}
+
+/**
+ * Returns true if the order is in any unconfirmed payment state
+ * (i.e. we should still hold reserved stock).
+ */
+export function isPaymentPending(
+  status: OrderStatus,
+  paymentMethod: PaymentMethod
+): boolean {
+  if (paymentMethod === "momo") {
+    return (
+      status === "pending" ||
+      status === "awaiting_momo" ||
+      status === "pending_verification"
+    );
+  }
+  // COD and pay-in-store are treated as confirmed once placed
+  return false;
 }

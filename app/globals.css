@@ -29,17 +29,41 @@
     --radius-md: 6px;
     --radius-lg: 8px;
     --radius: 6px;
+
+    /* Layout: container gutters from docs/DESIGN.md */
+    --gutter: 1rem;      /* 16px mobile */
+    --header-h: 3.5rem;  /* 56px — header height for scroll-padding */
+  }
+
+  @media (min-width: 640px) {
+    :root {
+      --gutter: 1.5rem;  /* 24px tablet */
+    }
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --gutter: 2rem;    /* 32px desktop */
+    }
   }
 }
 
 @layer base {
-  * {
-    border-color: var(--line);
+  /* Global box-sizing and tap highlight */
+  *, *::before, *::after {
+    box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* Prevent horizontal overflow on mobile */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
   html {
-    scroll-padding-top: 4rem;
+    scroll-padding-top: var(--header-h);
+    font-size: 16px; /* base — never shrink below 16px on mobile to avoid browser zoom */
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -56,9 +80,12 @@
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Prevent content from touching safe areas on notched phones */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 
-  /* Headings typography scale */
+  /* Headings typography scale — clamp() keeps them readable on all screens */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading), var(--font-sans), sans-serif;
     color: var(--ink);
@@ -66,27 +93,27 @@
   }
 
   h1 {
-    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-size: clamp(1.625rem, 5vw, 3rem); /* 26px mobile → 48px desktop */
     line-height: 1.1;
     letter-spacing: -0.02em;
     font-weight: 700;
   }
 
   h2 {
-    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    font-size: clamp(1.25rem, 3.5vw, 2rem); /* 20px mobile → 32px desktop */
     line-height: 1.15;
     letter-spacing: -0.015em;
     font-weight: 600;
   }
 
   h3 {
-    font-size: 1.25rem;
+    font-size: clamp(1.0625rem, 2.5vw, 1.25rem); /* 17px → 20px */
     line-height: 1.25;
     font-weight: 600;
   }
 
   h4 {
-    font-size: 1.125rem;
+    font-size: 1rem;
     line-height: 1.35;
     font-weight: 600;
   }
@@ -95,51 +122,88 @@
     text-wrap: pretty;
   }
 
+  /* Images: always responsive by default */
+  img, video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Links */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
   /* Selection highlight */
   ::selection {
     background-color: var(--accent-soft);
     color: var(--ink);
   }
 
-  /* Subtle custom thin scrollbars */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--line-strong) transparent;
-  }
+  /* Thin scrollbars — desktop only, hidden on mobile (they handle natively) */
+  @media (pointer: fine) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--line-strong) transparent;
+    }
 
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background-color: var(--line-strong);
-    border-radius: 3px;
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background-color: var(--line-strong);
+      border-radius: 3px;
+    }
   }
 }
 
 @layer utilities {
-  /* Tabular numbers for prices, stock counts, order numbers */
+  /* Tabular numbers for prices, quantities, and order numbers */
   .price {
     font-variant-numeric: tabular-nums;
     font-weight: 600;
+    font-family: var(--font-sans), sans-serif;
   }
 
+  /* Mono style for SKU, specs, model numbers */
   .mono-specs {
     font-family: var(--font-mono), monospace;
     font-size: 0.8125rem; /* 13px */
+    letter-spacing: 0.01em;
   }
 
+  /* Display hero title */
   .display-title {
     font-family: var(--font-heading), sans-serif;
-    font-size: clamp(2.5rem, 5vw, 4.25rem);
+    font-size: clamp(2rem, 6vw, 4.25rem); /* 32px mobile → 68px desktop */
     line-height: 1.05;
     letter-spacing: -0.02em;
     font-weight: 700;
     text-wrap: balance;
+  }
+
+  /* Section vertical rhythm from docs/DESIGN.md */
+  .section-spacing {
+    padding-top: 3rem;    /* 48px mobile */
+    padding-bottom: 3rem;
+  }
+
+  @media (min-width: 768px) {
+    .section-spacing {
+      padding-top: 4.5rem;  /* 72px tablet */
+      padding-bottom: 4.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .section-spacing {
+      padding-top: 6rem;   /* 96px desktop */
+      padding-bottom: 6rem;
+    }
+  }
+
+  /* Bottom safe-area padding for sticky bottom bars on mobile */
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 }

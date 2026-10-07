@@ -1,8 +1,8 @@
 # PROJECT
-Online shop selling computer accessories, hardware, office chairs and tables. Supports delivery and in-store pickup. Online payment via Paystack.
+Online shop selling computer accessories, hardware, office chairs and tables. Supports home delivery and in-store pickup. Payment via manual Mobile Money (MoMo — MTN, Vodafone Cash, AirtelTigo Money), cash on delivery, or pay in store. No payment gateway.
 
 # STACK
-Next.js App Router, TypeScript (strict), Tailwind CSS, shadcn/ui, Convex (database, functions, auth, file storage, crons), Paystack, Resend (via plain fetch, no SDK), deployed on Vercel.
+Next.js App Router, TypeScript (strict), Tailwind CSS, shadcn/ui, Convex (database, functions, auth, file storage, crons), Resend (via plain fetch, no SDK), deployed on Vercel. No payment gateway — payments are manual MoMo, COD, or in-store.
 
 # ARCHITECTURE RULES
 - Keep the stack simple. Do not add a library unless necessary; allowed extras: react-hook-form, zod, @hookform/resolvers, papaparse, react-markdown, @convex-dev/auth, @convex-dev/rate-limiter, convex-test, vitest, playwright, @vercel/analytics, @vercel/speed-insights, lucide-react, sonner. Ask before adding anything else.
@@ -15,7 +15,9 @@ Next.js App Router, TypeScript (strict), Tailwind CSS, shadcn/ui, Convex (databa
 - Stock model: product.stock is physical units on hand; product.reservedStock is units held by unpaid orders; available = stock - reservedStock. Every stock change writes a row to stockAdjustments.
 - Order status changes only through the state machine in convex/lib/orderStatus.ts and always write an orderEvents row.
 - Admin mutations write an auditLogs row (after Step 25 exists; before that, leave a clear TODO(audit) comment).
-- Secrets only in environment variables. Never log secrets or full payment payloads containing card data.
+- Payment model: three methods — momo (customer sends MoMo, submits reference, admin verifies manually), cash_on_delivery (pay when goods arrive), pay_in_store (pay at pickup counter). Never trust the client for payment status; admin marks as paid.
+- MoMo reference submitted by the customer is stored on the order; admin confirms against the shop's MoMo account before processing.
+- Secrets only in environment variables. Never log secrets.
 - Accessibility and mobile-first design are requirements, not extras.
 
 # UI RULES

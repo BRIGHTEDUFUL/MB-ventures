@@ -4,25 +4,30 @@
 
 import { v } from "convex/values";
 
-/**
- * Reusable role validator
- */
+/** User roles */
 export const roleValidator = v.union(v.literal("customer"), v.literal("admin"));
 
-/**
- * Reusable fulfillment validator
- */
+/** Fulfillment type */
 export const fulfillmentValidator = v.union(
   v.literal("delivery"),
   v.literal("pickup")
 );
 
 /**
- * Reusable order status validator
+ * Order status validator.
+ *
+ * Payment flow (MoMo):
+ *   pending → awaiting_momo → pending_verification → processing → out_for_delivery / ready_for_pickup → completed
+ *
+ * Payment flow (COD / pay_in_store):
+ *   pending → processing → out_for_delivery / ready_for_pickup → completed
+ *
+ * Any status can transition to cancelled (unless terminal).
  */
 export const orderStatusValidator = v.union(
-  v.literal("pending_payment"),
-  v.literal("paid"),
+  v.literal("pending"),
+  v.literal("awaiting_momo"),
+  v.literal("pending_verification"),
   v.literal("processing"),
   v.literal("ready_for_pickup"),
   v.literal("out_for_delivery"),
@@ -31,19 +36,41 @@ export const orderStatusValidator = v.union(
 );
 
 /**
- * Reusable payment status validator
+ * Payment method validator.
+ * momo            — customer manually transfers via Mobile Money, submits reference
+ * cash_on_delivery — rider collects cash on arrival
+ * pay_in_store    — customer pays at the counter during pickup
  */
-export const paymentStatusValidator = v.union(
-  v.literal("unpaid"),
-  v.literal("paid"),
-  v.literal("failed"),
-  v.literal("refund_pending"),
-  v.literal("refunded")
+export const paymentMethodValidator = v.union(
+  v.literal("momo"),
+  v.literal("cash_on_delivery"),
+  v.literal("pay_in_store")
 );
 
 /**
- * Reusable stock adjustment reason validator
+ * MoMo network validator (Ghana networks)
  */
+export const momoNetworkValidator = v.union(
+  v.literal("MTN"),
+  v.literal("Telecel"),    // formerly Vodafone Cash
+  v.literal("AirtelTigo")
+);
+
+/**
+ * Payment status validator.
+ * unpaid               — no payment yet
+ * pending_verification — MoMo reference submitted; admin must verify
+ * paid                 — confirmed paid (MoMo verified, COD collected, or in-store payment taken)
+ * refunded             — refund issued
+ */
+export const paymentStatusValidator = v.union(
+  v.literal("unpaid"),
+  v.literal("pending_verification"),
+  v.literal("paid"),
+  v.literal("refunded")
+);
+
+/** Stock adjustment reason */
 export const stockAdjustmentReasonValidator = v.union(
   v.literal("sale"),
   v.literal("reservation_release"),
@@ -54,9 +81,7 @@ export const stockAdjustmentReasonValidator = v.union(
   v.literal("correction")
 );
 
-/**
- * Reusable order event type validator
- */
+/** Order event type */
 export const orderEventTypeValidator = v.union(
   v.literal("status"),
   v.literal("payment"),
@@ -65,34 +90,26 @@ export const orderEventTypeValidator = v.union(
   v.literal("system")
 );
 
-/**
- * Product specification item validator
- */
+/** Product specification item */
 export const specItemValidator = v.object({
   label: v.string(),
   value: v.string(),
 });
 
-/**
- * Cart item validator
- */
+/** Cart item */
 export const cartItemValidator = v.object({
   productId: v.id("products"),
   quantity: v.number(),
 });
 
-/**
- * Customer snapshot validator for orders
- */
+/** Customer snapshot embedded in orders (immutable at checkout) */
 export const customerValidator = v.object({
   name: v.string(),
   email: v.string(),
   phone: v.string(),
 });
 
-/**
- * Delivery address validator
- */
+/** Delivery address */
 export const deliveryAddressValidator = v.object({
   line1: v.string(),
   line2: v.optional(v.string()),
@@ -101,18 +118,14 @@ export const deliveryAddressValidator = v.object({
   notes: v.optional(v.string()),
 });
 
-/**
- * Pickup snapshot validator
- */
+/** Pickup location snapshot embedded in orders */
 export const pickupSnapshotValidator = v.object({
   name: v.string(),
   address: v.string(),
   openingHours: v.string(),
 });
 
-/**
- * Order item snapshot validator (immutable snapshot at purchase time)
- */
+/** Order item snapshot (immutable snapshot of product at purchase time) */
 export const orderItemValidator = v.object({
   productId: v.id("products"),
   name: v.string(),
@@ -122,18 +135,14 @@ export const orderItemValidator = v.object({
   imageId: v.optional(v.id("_storage")),
 });
 
-/**
- * Announcement banner settings validator
- */
+/** Announcement banner settings */
 export const announcementValidator = v.object({
   enabled: v.boolean(),
   text: v.string(),
   link: v.optional(v.string()),
 });
 
-/**
- * Hero section settings validator
- */
+/** Hero section settings */
 export const heroSettingsValidator = v.object({
   title: v.string(),
   subtitle: v.string(),
@@ -142,9 +151,7 @@ export const heroSettingsValidator = v.object({
   imageId: v.optional(v.id("_storage")),
 });
 
-/**
- * Promo tile validator
- */
+/** Promo tile (homepage grid) */
 export const promoTileValidator = v.object({
   title: v.string(),
   subtitle: v.string(),
@@ -152,13 +159,19 @@ export const promoTileValidator = v.object({
   imageId: v.optional(v.id("_storage")),
 });
 
-/**
- * Social links validator
- */
+/** Shop MoMo account details (stored in siteSettings) */
+export const momoAccountValidator = v.object({
+  network: momoNetworkValidator,
+  number: v.string(),   // e.g. "0241234567"
+  name: v.string(),     // Account name — shown to customers to verify transfer
+});
+
+/** Social media links */
 export const socialLinksValidator = v.object({
   facebook: v.optional(v.string()),
   instagram: v.optional(v.string()),
   x: v.optional(v.string()),
   tiktok: v.optional(v.string()),
   youtube: v.optional(v.string()),
+  whatsapp: v.optional(v.string()),
 });

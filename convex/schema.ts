@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
 import {
   announcementValidator,
   cartItemValidator,
@@ -7,9 +8,12 @@ import {
   deliveryAddressValidator,
   fulfillmentValidator,
   heroSettingsValidator,
+  momoAccountValidator,
+  momoNetworkValidator,
   orderEventTypeValidator,
   orderItemValidator,
   orderStatusValidator,
+  paymentMethodValidator,
   paymentStatusValidator,
   pickupSnapshotValidator,
   promoTileValidator,
@@ -20,7 +24,10 @@ import {
 } from "./lib/validators";
 
 export default defineSchema({
-  // Users (will be extended with Convex Auth in Step 3)
+  // Convex Auth system tables (sessions, verification codes, accounts)
+  ...authTables,
+
+  // Users (extended with Convex Auth in Step 3)
   users: defineTable({
     name: v.optional(v.string()),
     email: v.optional(v.string()),
@@ -56,7 +63,7 @@ export default defineSchema({
     price: v.number(), // Integer in pesewas
     salePrice: v.optional(v.number()), // Integer in pesewas
     stock: v.number(), // Physical units on hand
-    reservedStock: v.number(), // Units reserved by unpaid orders
+    reservedStock: v.number(), // Units reserved by unpaid/unconfirmed orders
     imageIds: v.array(v.id("_storage")),
     specs: v.array(specItemValidator),
     isActive: v.boolean(),
@@ -102,29 +109,53 @@ export default defineSchema({
     orderNumber: v.string(), // e.g. "ORD-000123"
     userId: v.optional(v.id("users")),
     guestToken: v.optional(v.string()),
-    checkoutKey: v.string(), // For idempotency
+    checkoutKey: v.string(), // For idempotency — prevents duplicate order submission
+
+    // Customer snapshot (immutable at checkout)
     customer: customerValidator,
+
+    // Fulfillment
     fulfillment: fulfillmentValidator,
     deliveryAddress: v.optional(deliveryAddressValidator),
     deliveryZoneId: v.optional(v.id("deliveryZones")),
     deliveryZoneName: v.optional(v.string()),
     pickupLocationId: v.optional(v.id("pickupLocations")),
     pickupSnapshot: v.optional(pickupSnapshotValidator),
+
+    // Items (immutable snapshot at checkout)
     items: v.array(orderItemValidator),
-    subtotal: v.number(), // Pesewas
-    deliveryFee: v.number(), // Pesewas
-    total: v.number(), // Pesewas
+
+    // Money (all in pesewas — integers)
+    subtotal: v.number(),
+    deliveryFee: v.number(), // 0 for pickup and COD (fee collected on arrival)
+    total: v.number(),
     currency: v.string(), // "GHS"
+
+    // Status
     status: orderStatusValidator,
+
+    // Payment
+    paymentMethod: paymentMethodValidator,
     paymentStatus: paymentStatusValidator,
-    paymentReferences: v.array(v.string()),
+
+    // MoMo-specific fields (null for COD / pay-in-store orders)
+    momoNetwork: v.optional(momoNetworkValidator), // Network customer used
+    momoPhone: v.optional(v.string()),             // Number customer sent from
+    momoReference: v.optional(v.string()),         // Reference/transaction ID customer provides
+
+    // Timestamps
     paidAt: v.optional(v.number()),
     cancelReason: v.optional(v.string()),
+
+    // Admin tooling
     needsAttention: v.boolean(),
     attentionReason: v.optional(v.string()),
     customerNote: v.optional(v.string()),
     internalNote: v.optional(v.string()),
-    expiresAt: v.optional(v.number()), // Timestamp for unpaid order expiry
+
+    // Auto-cancel unpaid MoMo orders after configurable window
+    expiresAt: v.optional(v.number()),
+
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -132,6 +163,7 @@ export default defineSchema({
     .index("by_user_created", ["userId", "createdAt"])
     .index("by_status_created", ["status", "createdAt"])
     .index("by_payment_status", ["paymentStatus"])
+    .index("by_payment_method", ["paymentMethod"])
     .index("by_checkout_key", ["checkoutKey"])
     .index("by_email", ["customer.email"])
     .index("by_expires_at", ["status", "expiresAt"])
@@ -144,7 +176,7 @@ export default defineSchema({
     fromStatus: v.optional(v.string()),
     toStatus: v.optional(v.string()),
     message: v.string(),
-    actorId: v.optional(v.string()),
+    actorId: v.optional(v.string()), // userId or "system"
     createdAt: v.number(),
   }).index("by_order_created", ["orderId", "createdAt"]),
 
@@ -152,7 +184,7 @@ export default defineSchema({
   deliveryZones: defineTable({
     name: v.string(),
     fee: v.number(), // Pesewas
-    estimatedDays: v.string(),
+    estimatedDays: v.string(), // e.g. "1-2 business days"
     isActive: v.boolean(),
     sortOrder: v.number(),
   }).index("by_active_and_sort", ["isActive", "sortOrder"]),
@@ -171,8 +203,8 @@ export default defineSchema({
   siteSettings: defineTable({
     shopName: v.string(),
     tagline: v.string(),
-    currency: v.string(),
-    defaultCountryCode: v.string(),
+    currency: v.string(), // "GHS"
+    defaultCountryCode: v.string(), // "GH"
     contactEmail: v.string(),
     contactPhone: v.string(),
     whatsappNumber: v.string(),
@@ -180,11 +212,19 @@ export default defineSchema({
     announcement: announcementValidator,
     hero: heroSettingsValidator,
     promoTiles: v.array(promoTileValidator),
-    freeDeliveryThreshold: v.optional(v.number()),
-    orderExpiryMinutes: v.number(),
+
+    // Payment
+    momoAccounts: v.array(momoAccountValidator), // Shop's MoMo numbers (shown to customer at checkout)
+    cashOnDeliveryEnabled: v.boolean(),
+    payInStoreEnabled: v.boolean(),
+
+    // Thresholds
+    freeDeliveryThreshold: v.optional(v.number()), // Pesewas; null = no free delivery
+    orderExpiryMinutes: v.number(), // How long before an unpaid MoMo order is auto-cancelled
     lowStockThreshold: v.number(),
     maxCartQuantity: v.number(),
-    pricesIncludeTaxNote: v.string(),
+    pricesIncludeTaxNote: v.string(), // Shown near prices, e.g. "Prices include VAT"
+
     socialLinks: socialLinksValidator,
   }),
 
@@ -208,18 +248,6 @@ export default defineSchema({
     isRead: v.boolean(),
     createdAt: v.number(),
   }).index("by_created", ["createdAt"]),
-
-  // Webhook and payment verification idempotency log
-  paymentEvents: defineTable({
-    eventKey: v.string(), // Unique key: reference + eventType
-    reference: v.string(),
-    eventType: v.string(),
-    receivedAt: v.number(),
-    processedAt: v.optional(v.number()),
-    outcome: v.string(),
-  })
-    .index("by_event_key", ["eventKey"])
-    .index("by_reference", ["reference"]),
 
   // Full inventory audit trail for physical and reserved stock changes
   stockAdjustments: defineTable({

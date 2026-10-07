@@ -1,26 +1,22 @@
 import Link from "next/link";
-import { ArrowLeft, FileQuestion } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { Container } from "@/components/shared/Container";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-canvas flex items-center justify-center p-6 text-ink">
-      <div className="max-w-md w-full bg-surface rounded-lg border border-line p-8 text-center">
-        <div className="w-10 h-10 rounded-md bg-canvas flex items-center justify-center mx-auto mb-4 text-ink">
-          <FileQuestion className="w-5 h-5" strokeWidth={1.5} />
-        </div>
-        <h2 className="text-xl font-heading font-semibold text-ink mb-2">Page not found</h2>
-        <p className="text-ink-muted text-sm mb-6 leading-relaxed">
-          The requested page could not be found or may have moved.
+    <main className="min-h-[100dvh] flex items-center justify-center bg-surface py-12">
+      <Container size="narrow" className="text-center">
+        <p className="font-mono text-xs uppercase tracking-widest text-ink-muted mb-3">404</p>
+        <h1 className="font-heading font-bold tracking-tight mb-3">Page not found</h1>
+        <p className="text-ink-muted text-sm mb-6 max-w-xs mx-auto">
+          That page doesn&apos;t exist or may have moved.
         </p>
         <Link
           href="/"
-          className={buttonVariants({ variant: "secondary", size: "md" })}
+          className="inline-flex items-center justify-center h-10 px-5 rounded-md bg-ink text-white font-medium text-sm transition-opacity hover:opacity-90 active:opacity-75"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" strokeWidth={1.5} />
-          Return to shop
+          Back to store
         </Link>
-      </div>
-    </div>
+      </Container>
+    </main>
   );
 }

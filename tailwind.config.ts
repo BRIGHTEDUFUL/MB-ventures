@@ -86,6 +86,33 @@ export default {
         lg: "var(--radius-lg)", // 8px
         DEFAULT: "var(--radius-md)",
       },
+      screens: {
+        // Mobile-first breakpoints matching docs/DESIGN.md
+        xs: "375px",   // small phones
+        sm: "640px",   // tablet portrait
+        md: "768px",   // tablet landscape
+        lg: "1024px",  // desktop
+        xl: "1280px",  // max container
+        "2xl": "1536px",
+      },
+      spacing: {
+        // 8px spacing scale as per docs/DESIGN.md
+        "0.5": "4px",
+        "1": "8px",
+        "1.5": "12px",
+        "2": "16px",
+        "2.5": "20px",
+        "3": "24px",
+        "3.5": "28px",
+        "4": "32px",
+        "5": "40px",
+        "6": "48px",
+        "7": "56px",
+        "8": "64px",
+        "9": "72px",
+        "10": "80px",
+        "12": "96px",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

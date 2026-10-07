@@ -127,8 +127,118 @@
 
 ---
 
+### UI-2: Mobile-first responsive foundations
+- **Date**: 2026-10-06
+- **What was done**:
+  - Added `Viewport` export to `app/layout.tsx` with `width=device-width`, `initialScale=1`, `maximumScale=5` (accessibility-safe, never blocks user scaling), and `themeColor=#FFFFFF`.
+  - Added `title.template` and `openGraph` metadata.
+  - Added `overflow-x: hidden` + safe-area inset padding on `body` to prevent horizontal overflow on notched phones.
+  - Introduced CSS custom property `--gutter` (16px mobile / 24px tablet / 32px desktop) that drives layout spacing across all breakpoints.
+  - Updated all `clamp()` sizes on headings for better mobile readability (h1 from 26px → 48px, h2 from 20px → 32px).
+  - Added `min-h-[100dvh]` to all full-page layouts (handles iOS Safari's dynamic viewport).
+  - Added `img, video { max-width: 100%; height: auto; display: block; }` globally.
+  - Added `.section-spacing`, `.pb-safe` utility classes.
+  - Thin scrollbars now only apply on `pointer: fine` devices (hides on touch screens).
+  - Created `components/shared/Container.tsx` — shared responsive container component with `default` (1280px), `narrow` (768px), and `wide` variants, all using `px-[var(--gutter)]`.
+  - Added `xs: 375px` breakpoint to Tailwind config.
+  - Updated `app/(store)/page.tsx`, `app/not-found.tsx`, `app/error.tsx` to use `Container`.
+- **Files added/changed**:
+  - `app/layout.tsx`
+  - `app/globals.css`
+  - `tailwind.config.ts`
+  - `components/shared/Container.tsx` (new)
+  - `app/(store)/page.tsx`
+  - `app/not-found.tsx`
+  - `app/error.tsx`
+  - `docs/PROGRESS.md`
+- **New env vars**: `NEXT_PUBLIC_SITE_URL` (already set).
+- **New Convex functions**: None.
+- **Known limitations**: None. TypeScript and ESLint both pass (exit 0). Ready for Step 3 (Authentication).
+
+---
+
+### Decision: Remove Paystack — manual MoMo + COD + Pay-in-Store
+- **Date**: 2026-10-07
+- **What was done**:
+  - Removed Paystack from the project stack entirely. No payment gateway.
+  - **New payment model** — three methods:
+    - `momo`: Customer manually transfers via MTN MoMo / Telecel Cash / AirtelTigo Money, then submits a reference number. Admin verifies against the shop's account and marks as paid.
+    - `cash_on_delivery`: Payment collected by rider on arrival. No upfront payment required.
+    - `pay_in_store`: Payment collected at the pickup counter. No upfront payment required.
+  - **New order status flow (MoMo)**: `pending → awaiting_momo → pending_verification → processing → out_for_delivery / ready_for_pickup → completed`
+  - **New order status flow (COD / in-store)**: `pending → processing → out_for_delivery / ready_for_pickup → completed`
+  - `paymentEvents` table (Paystack webhook idempotency log) removed from schema.
+  - Added MoMo-specific order fields: `momoNetwork`, `momoPhone`, `momoReference`.
+  - Added `momoAccounts` (array), `cashOnDeliveryEnabled`, `payInStoreEnabled` to `siteSettings`.
+  - Added `by_payment_method` index to `orders`.
+  - Updated badge colour styles to use design tokens (no raw colour strings).
+  - State machine (`orderStatus.ts`) updated with `needsMomoVerification` and `isPaymentPending` helpers.
+  - `AGENTS.md` updated with payment model rules.
+- **Files changed**:
+  - `AGENTS.md`
+  - `convex/schema.ts`
+  - `convex/lib/constants.ts`
+  - `convex/lib/validators.ts`
+  - `convex/lib/orderStatus.ts`
+  - `docs/PROGRESS.md`
+- **New env vars**: None.
+- **New Convex functions**: None (schema and domain logic only).
+- **Known limitations**: None. TypeScript and ESLint both pass. Ready for Step 3 (Authentication).
+
+---
+
+### Step 3: Authentication (Convex Auth — email + password)
+- **Date**: 2026-10-07
+- **What was done**:
+  - Installed `@convex-dev/auth`.
+  - Configured **email + password only** auth (no Google, no OTP — deliberately simple per user requirement).
+  - Storefront is fully public — no auth needed to browse, search, or view products.
+  - Auth is only required for `/account` and `/admin` routes.
+  - Created `convex/auth.ts` — Convex Auth config with `Password` provider.
+  - Created `convex/auth.config.ts` — JWT domain config.
+  - Updated `convex/http.ts` — mounted auth HTTP handlers.
+  - Updated `convex/schema.ts` — spread `authTables` (sessions, accounts, verifications).
+  - Rewrote `convex/users.ts` — `currentUser` query, `updateProfile` mutation, `createUser` internal mutation, `requireUser` / `requireAdmin` server helpers (properly typed with `QueryCtx | MutationCtx`).
+  - Updated `components/shared/Providers.tsx` — replaced `ConvexClientProvider` with `ConvexAuthNextjsProvider`.
+  - Updated `app/layout.tsx` — wrapped in `ConvexAuthNextjsServerProvider` for server-side session reading.
+  - Created `middleware.ts` — protects `/account` and `/admin` only; redirects to `/auth/sign-in?redirect=...`; storefront bypassed.
+  - Created `app/(auth)/layout.tsx` — minimal auth shell (logo header + centred card + footer).
+  - Created `app/(auth)/sign-in/page.tsx` — email + password sign-in form.
+  - Created `app/(auth)/sign-up/page.tsx` — name + email + password sign-up form.
+  - Created `lib/hooks/useCurrentUser.ts` — client hook wrapping `currentUser` query.
+- **Files added/changed**:
+  - `convex/auth.ts` (new)
+  - `convex/auth.config.ts` (new)
+  - `convex/http.ts`
+  - `convex/schema.ts`
+  - `convex/users.ts`
+  - `middleware.ts` (new)
+  - `components/shared/Providers.tsx`
+  - `app/layout.tsx`
+  - `app/(auth)/layout.tsx` (new)
+  - `app/(auth)/sign-in/page.tsx` (new)
+  - `app/(auth)/sign-up/page.tsx` (new)
+  - `lib/hooks/useCurrentUser.ts` (new)
+  - `docs/PROGRESS.md`
+- **New env vars**:
+  - `JWT_PRIVATE_KEY` — generated and set on Convex dev deployment via `@convex-dev/auth` CLI
+  - `JWKS` — generated and set on Convex dev deployment via `@convex-dev/auth` CLI
+  - `SITE_URL` — set in `.env.local` and on Convex dev deployment
+- **New Convex functions**:
+  - `users.currentUser` — public query
+  - `users.updateProfile` — user-scoped mutation
+  - `users.createUser` — internal mutation (called by auth on signup)
+- **Known limitations**:
+  - No forgot-password page yet — `/auth/forgot-password` link is present but page doesn't exist; planned for a future step.
+  - Guest checkout (order without account) is planned for the checkout step.
+- **Verification**: `npx tsc --noEmit` passed, `next lint` passed, `next build` compiled successfully (0 errors, 0 warnings).
+
+---
+
 ## Convex function inventory
 
 | Name | Type | Access | Purpose |
 | --- | --- | --- | --- |
-| *(None yet)* | - | - | - |
+| `users.currentUser` | query | public | Return signed-in user's profile or null |
+| `users.updateProfile` | mutation | user-scoped | Update own name/phone |
+| `users.createUser` | internalMutation | internal | Called by Convex Auth on signup to set role + timestamps |
