@@ -70,7 +70,7 @@ export function Header({ categories, supportPhone, whatsappNumber }: HeaderProps
               href="/"
               className="flex min-h-[44px] items-center gap-2 text-ink font-heading font-bold text-lg sm:text-xl tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus rounded-sm py-1"
             >
-              <Logo size="sm" variant="text" />
+              <Logo size="sm" variant="text" href={undefined} />
             </Link>
           </div>
 
