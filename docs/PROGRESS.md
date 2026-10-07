@@ -235,6 +235,52 @@
 
 ---
 
+### Step 4: Storefront Shell, Navigation, Search, and Catalog Backend
+- **Date**: 2026-10-07
+- **What was done**:
+  - Implemented full Convex catalog queries in `convex/categories.ts` (`list`, `getBySlug`) and `convex/products.ts` (`listFeatured`, `listLatest`, `listByCategory`, `getBySlug`, `search` with full-text search indexing).
+  - Implemented `convex/siteSettings.ts` returning store branding, contact info, MoMo accounts, delivery zones, pickup locations, and hero settings.
+  - Implemented `convex/seed.ts` with `seedDemoData` populating realistic computer accessories, hardware, ergonomic chairs, standing desks, delivery zones, and settings.
+  - Created `components/store/AnnouncementBar.tsx` — accessible dismissible announcement bar matching design tokens.
+  - Created `components/store/Header.tsx` — responsive sticky header with brand logo, category links with hover underline reveal, search trigger (`⌘K`), user account dropdown, cart button, and mobile hamburger.
+  - Created `components/store/MobileNavDrawer.tsx` — mobile drawer with smooth slide-in, category navigation, user account actions, and quick contact info.
+  - Created `components/store/QuickSearchDialog.tsx` — full-text live search dialog with debounced query, product preview tiles with tabular prices, and keyboard shortcuts.
+  - Created `components/store/ProductCard.tsx` — high quality product card strictly following `docs/DESIGN.md` (neutral canvas background, tabular pricing, sale/stock badges, quick add).
+  - Created `components/store/Footer.tsx` — comprehensive specialist retailer footer with payment method badges (MTN MoMo, Telecel Cash, AirtelTigo, COD, In-store Pickup), physical address in Accra, contact hours, and policies.
+  - Created `app/(store)/layout.tsx` — server layout with `fetchQuery` dynamic rendering.
+  - Upgraded `app/(store)/page.tsx` — dynamic homepage with specialist hero, category grid, featured products, and payment/delivery trust highlights.
+- **Files added/changed**:
+  - `convex/categories.ts` (new)
+  - `convex/products.ts` (new)
+  - `convex/siteSettings.ts` (new)
+  - `convex/seed.ts` (new)
+  - `convex/lib/validators.ts`
+  - `lib/hooks/useCurrentUser.ts`
+  - `components/store/AnnouncementBar.tsx` (new)
+  - `components/store/Header.tsx` (new)
+  - `components/store/MobileNavDrawer.tsx` (new)
+  - `components/store/QuickSearchDialog.tsx` (new)
+  - `components/store/ProductCard.tsx` (new)
+  - `components/store/Footer.tsx` (new)
+  - `app/(store)/layout.tsx` (new)
+  - `app/(store)/page.tsx`
+  - `docs/PROGRESS.md`
+- **New Convex functions**:
+  - `categories.list` — public query
+  - `categories.getBySlug` — public query
+  - `products.listFeatured` — public query
+  - `products.listLatest` — public query
+  - `products.listByCategory` — public query
+  - `products.getBySlug` — public query
+  - `products.search` — public query (full-text search)
+  - `siteSettings.getPublicSettings` — public query
+  - `seed.seedDemoData` — public mutation (safe idempotent seeder)
+- **Known limitations**:
+  - Cart drawer and full checkout flow are in subsequent steps (Step 5 / UI-11).
+  - Individual Category and Product detail pages are ready for dedicated page routes in Step 5.
+
+---
+
 ## Convex function inventory
 
 | Name | Type | Access | Purpose |
@@ -242,3 +288,12 @@
 | `users.currentUser` | query | public | Return signed-in user's profile or null |
 | `users.updateProfile` | mutation | user-scoped | Update own name/phone |
 | `users.createUser` | internalMutation | internal | Called by Convex Auth on signup to set role + timestamps |
+| `categories.list` | query | public | List active categories or subcategories |
+| `categories.getBySlug` | query | public | Get category by slug with subcategories |
+| `products.listFeatured` | query | public | List featured active products with pricing & stock info |
+| `products.listLatest` | query | public | List latest active products |
+| `products.listByCategory` | query | public | List products in a category |
+| `products.getBySlug` | query | public | Get single product by slug |
+| `products.search` | query | public | Full-text search products by query |
+| `siteSettings.getPublicSettings` | query | public | Return store branding, contact, MoMo accounts, and zones |
+| `seed.seedDemoData` | mutation | public | Seed initial demo catalog and store configuration |

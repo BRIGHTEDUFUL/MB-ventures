@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as categories from "../categories.js";
 import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as lib_availability from "../lib/availability.js";
@@ -16,6 +17,9 @@ import type * as lib_constants from "../lib/constants.js";
 import type * as lib_orderStatus from "../lib/orderStatus.js";
 import type * as lib_searchText from "../lib/searchText.js";
 import type * as lib_validators from "../lib/validators.js";
+import type * as products from "../products.js";
+import type * as seed from "../seed.js";
+import type * as siteSettings from "../siteSettings.js";
 import type * as users from "../users.js";
 
 import type {
@@ -26,6 +30,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  categories: typeof categories;
   crons: typeof crons;
   http: typeof http;
   "lib/availability": typeof lib_availability;
@@ -33,6 +38,9 @@ declare const fullApi: ApiFromModules<{
   "lib/orderStatus": typeof lib_orderStatus;
   "lib/searchText": typeof lib_searchText;
   "lib/validators": typeof lib_validators;
+  products: typeof products;
+  seed: typeof seed;
+  siteSettings: typeof siteSettings;
   users: typeof users;
 }>;
 

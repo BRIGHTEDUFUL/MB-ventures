@@ -92,6 +92,7 @@ export const orderEventTypeValidator = v.union(
 
 /** Product specification item */
 export const specItemValidator = v.object({
+  group: v.optional(v.string()),
   label: v.string(),
   value: v.string(),
 });

@@ -4,15 +4,16 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
 /**
- * Returns the current authenticated user, or null if signed out.
- * Loading state is represented as `undefined`.
+ * Returns user info, auth status, and loading state.
  *
  * Usage:
- *   const user = useCurrentUser();
- *   if (user === undefined) return <Skeleton />;  // loading
- *   if (user === null) return <SignInLink />;      // signed out
- *   return <p>Hello, {user.name}</p>;             // signed in
+ *   const { user, isAuthenticated, isLoading } = useCurrentUser();
  */
 export function useCurrentUser() {
-  return useQuery(api.users.currentUser);
+  const user = useQuery(api.users.currentUser);
+  return {
+    user: user ?? null,
+    isAuthenticated: !!user,
+    isLoading: user === undefined,
+  };
 }
