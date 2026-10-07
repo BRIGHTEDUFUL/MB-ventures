@@ -52,7 +52,7 @@ export default function AdminDashboardPage() {
         actions={
           <Link
             href="/admin/products/new"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-brand text-white text-xs font-semibold hover:bg-brand-hover transition-colors"
+            className="inline-flex items-center gap-1.5 h-11 px-3.5 py-2 rounded-md bg-brand text-white text-xs font-semibold hover:bg-brand-hover transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add Product</span>
@@ -118,7 +118,7 @@ export default function AdminDashboardPage() {
             </div>
             <Link
               href="/admin/orders?tab=pending_verification"
-              className="text-xs font-semibold text-accent hover:underline flex items-center gap-1"
+              className="min-h-11 text-xs font-semibold text-accent hover:underline flex items-center gap-1"
             >
               <span>View all pending</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -173,7 +173,7 @@ export default function AdminDashboardPage() {
                     <td className="py-3 px-3 text-right">
                       <Link
                         href={`/admin/orders/${order._id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-brand text-white font-semibold text-xs hover:bg-brand-hover transition-colors"
+                        className="inline-flex items-center gap-1 h-11 px-3 py-1.5 rounded-md bg-brand text-white font-semibold text-xs hover:bg-brand-hover transition-colors"
                       >
                         <span>Verify</span>
                         <ArrowRight className="w-3 h-3" />
@@ -195,7 +195,7 @@ export default function AdminDashboardPage() {
             <h2 className="font-heading font-bold text-base text-ink">Recent Orders</h2>
             <Link
               href="/admin/orders"
-              className="text-xs font-semibold text-ink-muted hover:text-ink underline"
+              className="inline-flex items-center min-h-11 text-xs font-semibold text-ink-muted hover:text-ink underline"
             >
               View all orders
             </Link>
@@ -243,7 +243,7 @@ export default function AdminDashboardPage() {
                       <td className="py-3 px-3 text-right">
                         <Link
                           href={`/admin/orders/${order._id}`}
-                          className="text-xs font-semibold text-ink hover:underline p-1"
+                          className="inline-flex items-center min-h-11 px-1 text-xs font-semibold text-ink hover:underline"
                         >
                           Inspect →
                         </Link>
@@ -265,7 +265,7 @@ export default function AdminDashboardPage() {
           <div className="space-y-2 text-xs">
             <Link
               href="/admin/products/new"
-              className="flex items-center justify-between p-3 rounded-md border border-line hover:border-line-strong hover:bg-canvas transition-colors font-medium text-ink"
+              className="flex items-center justify-between min-h-11 px-3 rounded-md border border-line hover:border-line-strong hover:bg-canvas transition-colors font-medium text-ink"
             >
               <span>Create New Product</span>
               <Plus className="w-4 h-4 text-ink-muted" />
@@ -273,7 +273,7 @@ export default function AdminDashboardPage() {
 
             <Link
               href="/admin/categories"
-              className="flex items-center justify-between p-3 rounded-md border border-line hover:border-line-strong hover:bg-canvas transition-colors font-medium text-ink"
+              className="flex items-center justify-between min-h-11 px-3 rounded-md border border-line hover:border-line-strong hover:bg-canvas transition-colors font-medium text-ink"
             >
               <span>Manage Categories</span>
               <ArrowRight className="w-4 h-4 text-ink-muted" />
@@ -281,7 +281,7 @@ export default function AdminDashboardPage() {
 
             <Link
               href="/admin/delivery"
-              className="flex items-center justify-between p-3 rounded-md border border-line hover:border-line-strong hover:bg-canvas transition-colors font-medium text-ink"
+              className="flex items-center justify-between min-h-11 px-3 rounded-md border border-line hover:border-line-strong hover:bg-canvas transition-colors font-medium text-ink"
             >
               <span>Delivery Zones & Pickup Locations</span>
               <ArrowRight className="w-4 h-4 text-ink-muted" />
@@ -289,7 +289,7 @@ export default function AdminDashboardPage() {
 
             <Link
               href="/admin/settings"
-              className="flex items-center justify-between p-3 rounded-md border border-line hover:border-line-strong hover:bg-canvas transition-colors font-medium text-ink"
+              className="flex items-center justify-between min-h-11 px-3 rounded-md border border-line hover:border-line-strong hover:bg-canvas transition-colors font-medium text-ink"
             >
               <span>Site & MoMo Accounts Settings</span>
               <ArrowRight className="w-4 h-4 text-ink-muted" />

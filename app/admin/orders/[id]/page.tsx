@@ -75,7 +75,7 @@ export default function AdminOrderDetailPage() {
         <p className="text-xs text-ink-muted">The requested order does not exist or was deleted.</p>
         <Link
           href="/admin/orders"
-          className="inline-flex items-center gap-1 px-4 py-2 rounded-md bg-brand text-white text-xs font-semibold"
+          className="inline-flex items-center gap-1 h-11 px-4 py-2 rounded-md bg-brand text-white text-xs font-semibold"
         >
           Back to Orders
         </Link>
@@ -164,7 +164,7 @@ export default function AdminOrderDetailPage() {
               href={`https://wa.me/${order.customer.phone.replace(/[^0-9]/g, "")}?text=${whatsappMessage}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-success text-surface text-xs font-semibold hover:bg-success/90 transition-colors"
+              className="inline-flex items-center gap-1.5 h-11 px-3 py-2 rounded-md bg-success text-surface text-xs font-semibold hover:bg-success/90 transition-colors"
             >
               <MessageSquare className="w-3.5 h-3.5" />
               <span>WhatsApp Customer</span>
@@ -235,7 +235,7 @@ export default function AdminOrderDetailPage() {
                   <button
                     type="button"
                     onClick={handleVerifyMomo}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-brand text-white text-xs font-semibold hover:bg-brand-hover transition-colors"
+                    className="inline-flex items-center gap-2 h-11 px-4 py-2.5 rounded-md bg-brand text-white text-xs font-semibold hover:bg-brand-hover transition-colors"
                   >
                     <CheckCircle2 className="w-4 h-4 text-success" />
                     <span>Confirm MoMo Payment Received</span>
@@ -244,7 +244,7 @@ export default function AdminOrderDetailPage() {
                   <button
                     type="button"
                     onClick={() => setRejectDialogOpen(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md border border-danger/40 bg-surface text-danger text-xs font-semibold hover:bg-danger-soft transition-colors"
+                    className="inline-flex items-center gap-2 h-11 px-4 py-2.5 rounded-md border border-danger/40 bg-surface text-danger text-xs font-semibold hover:bg-danger-soft transition-colors"
                   >
                     <XCircle className="w-4 h-4" />
                     <span>Flag / Reject Reference</span>
@@ -283,7 +283,7 @@ export default function AdminOrderDetailPage() {
                         setTargetStatus(st);
                         setTransitionDialogOpen(true);
                       }}
-                      className={`px-3.5 py-2 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                      className={`h-11 px-3.5 py-2 rounded-md text-xs font-semibold transition-colors flex items-center gap-1.5 ${
                         st === "completed"
                           ? "bg-success text-surface hover:bg-success/90"
                           : st === "cancelled"
@@ -391,13 +391,19 @@ export default function AdminOrderDetailPage() {
               <p className="font-semibold text-sm text-ink">{order.customer.name}</p>
               <div className="flex items-center gap-2 text-ink-muted">
                 <Phone className="w-3.5 h-3.5 shrink-0" />
-                <a href={`tel:${order.customer.phone}`} className="font-mono hover:text-ink">
+                <a
+                  href={`tel:${order.customer.phone}`}
+                  className="inline-flex items-center min-h-11 font-mono hover:text-ink"
+                >
                   {order.customer.phone}
                 </a>
               </div>
               <div className="flex items-center gap-2 text-ink-muted">
                 <Mail className="w-3.5 h-3.5 shrink-0" />
-                <a href={`mailto:${order.customer.email}`} className="hover:text-ink truncate">
+                <a
+                  href={`mailto:${order.customer.email}`}
+                  className="inline-flex items-center min-h-11 break-all hover:text-ink"
+                >
                   {order.customer.email}
                 </a>
               </div>
@@ -459,7 +465,7 @@ export default function AdminOrderDetailPage() {
               type="button"
               disabled={isSavingNote || internalNoteInput === null}
               onClick={handleSaveInternalNote}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-brand text-white text-xs font-semibold hover:bg-brand-hover disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 h-11 px-3 py-1.5 rounded-md bg-brand text-white text-xs font-semibold hover:bg-brand-hover disabled:opacity-40"
             >
               <Save className="w-3.5 h-3.5" />
               <span>{isSavingNote ? "Saving..." : "Save Note"}</span>

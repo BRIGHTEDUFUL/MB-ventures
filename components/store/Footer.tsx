@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/shared/Logo";
 import {
   Phone,
   Mail,
@@ -11,7 +12,6 @@ import {
 } from "lucide-react";
 
 interface FooterProps {
-  shopName: string;
   tagline: string;
   supportEmail: string;
   supportPhone: string;
@@ -26,7 +26,6 @@ interface FooterProps {
 }
 
 export function Footer({
-  shopName,
   tagline,
   supportEmail,
   supportPhone,
@@ -96,15 +95,7 @@ export function Footer({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-ink font-heading font-bold text-lg tracking-tight"
-            >
-              <span className="w-7 h-7 bg-ink text-surface rounded flex items-center justify-center text-xs font-mono font-bold shrink-0">
-                MB
-              </span>
-              <span>{shopName || "MB Ventures GH"}</span>
-            </Link>
+            <Logo size="md" variant="text" className="" />
             <p className="text-xs text-ink-muted leading-relaxed max-w-sm">
               {tagline ||
                 "Specialist supplier of ergonomic workspace seating, motorized standing desks, mechanical peripherals, and high-performance computing hardware in Accra, Ghana."}
@@ -224,9 +215,7 @@ export function Footer({
       {/* Sub-footer bottom bar */}
       <div className="border-t border-line bg-surface py-4">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-ink-muted">
-          <p>
-            © {currentYear} {shopName || "MB Ventures GH"}. All rights reserved.
-          </p>
+          <p>© {currentYear} MB Ventures GH. All rights reserved.</p>
           {(termsPage || privacyPage) && (
             <div className="flex items-center gap-4 text-xs">
               {termsPage && (

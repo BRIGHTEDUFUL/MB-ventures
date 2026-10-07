@@ -237,7 +237,7 @@ export function ImageUploader({
                     }}
                     title="Move left"
                     aria-label="Move photo left"
-                    className="w-6 h-6 rounded bg-surface/20 hover:bg-surface text-surface hover:text-ink disabled:opacity-20 flex items-center justify-center transition-colors"
+                    className="w-11 h-11 rounded bg-surface/20 hover:bg-surface text-surface hover:text-ink disabled:opacity-20 flex items-center justify-center transition-colors"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" />
                   </button>
@@ -250,7 +250,7 @@ export function ImageUploader({
                     }}
                     title="Move right"
                     aria-label="Move photo right"
-                    className="w-6 h-6 rounded bg-surface/20 hover:bg-surface text-surface hover:text-ink disabled:opacity-20 flex items-center justify-center transition-colors"
+                    className="w-11 h-11 rounded bg-surface/20 hover:bg-surface text-surface hover:text-ink disabled:opacity-20 flex items-center justify-center transition-colors"
                   >
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
@@ -264,7 +264,7 @@ export function ImageUploader({
                   }}
                   title="Remove image"
                   aria-label="Remove photo"
-                  className="w-6 h-6 rounded bg-danger/80 hover:bg-danger text-surface flex items-center justify-center transition-colors"
+                  className="w-11 h-11 rounded bg-danger/80 hover:bg-danger text-surface flex items-center justify-center transition-colors"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>

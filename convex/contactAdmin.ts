@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireAdmin } from "./users";
+import { logAudit } from "./auditLogs";
 import type { Id } from "./_generated/dataModel";
 
 const itemValidator = v.object({
@@ -90,13 +91,21 @@ export const setRead = mutation({
   args: { messageId: v.id("contactMessages"), isRead: v.boolean() },
   returns: v.object({ ok: v.literal(true) }),
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
-    // TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
+    const { user } = await requireAdmin(ctx);
 
     const row = await ctx.db.get(args.messageId);
     if (!row) throw new Error("Message not found.");
 
     await ctx.db.patch(args.messageId, { isRead: args.isRead });
+
+    await logAudit(ctx, {
+      userId: user._id,
+      action: args.isRead ? "mark_read" : "mark_unread",
+      resourceType: "contactMessage",
+      resourceId: args.messageId,
+      details: `Marked contact message from ${row.name} (${row.email}) as ${args.isRead ? "read" : "unread"}`,
+    });
+
     return { ok: true } as const;
   },
 });
@@ -108,13 +117,21 @@ export const remove = mutation({
   args: { messageId: v.id("contactMessages") },
   returns: v.object({ ok: v.literal(true) }),
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
-    // TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
+    const { user } = await requireAdmin(ctx);
 
     const row = await ctx.db.get(args.messageId);
     if (!row) throw new Error("Message not found.");
 
     await ctx.db.delete(args.messageId);
+
+    await logAudit(ctx, {
+      userId: user._id,
+      action: "delete",
+      resourceType: "contactMessage",
+      resourceId: args.messageId,
+      details: `Deleted contact message from ${row.name} (${row.email}): "${row.message.substring(0, 50)}${row.message.length > 50 ? "..." : ""}"`,
+    });
+
     return { ok: true } as const;
   },
 });

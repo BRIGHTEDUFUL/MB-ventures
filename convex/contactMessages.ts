@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { internalAction, internalQuery, mutation } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { triggerNewContactMessage } from "./emails/triggers";
 
 /** Per-email cap enforced in the mutation (no rate-limiter component installed). */
 const RATE_LIMIT_MAX = 3;
@@ -96,11 +97,44 @@ export const getMessage = internalQuery({
 export const notifyShop = internalAction({
   args: { messageId: v.id("contactMessages") },
   handler: async (ctx, args) => {
-    // TODO(email): wire to Resend template 10 in Step 20 (RESEND_API_KEY not configured).
     const message = await ctx.runQuery(internal.contactMessages.getMessage, {
       messageId: args.messageId,
     });
     if (!message) return;
-    // RESEND_API_KEY is not configured yet — send nothing.
+
+    // Get site settings for shop details
+    const settings = await ctx.runQuery(internal.contactMessages.getSettings);
+    if (!settings) return;
+
+    const siteUrl = process.env.SITE_URL || "http://localhost:3000";
+
+    // Trigger admin email notification
+    await triggerNewContactMessage(ctx, {
+      name: message.name,
+      email: message.email,
+      phone: message.phone,
+      message: message.message,
+      siteUrl,
+      shopName: settings.shopName,
+      shopAddress: settings.shopAddress,
+      contactEmail: settings.contactEmail,
+      contactPhone: settings.contactPhone,
+    });
+  },
+});
+
+/**
+ * Internal Query: get site settings for email templates.
+ */
+export const getSettings = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const settings = await ctx.db.query("siteSettings").first();
+    return {
+      shopName: settings?.shopName || "MB Ventures GH",
+      shopAddress: settings?.address,
+      contactEmail: settings?.contactEmail,
+      contactPhone: settings?.contactPhone,
+    };
   },
 });

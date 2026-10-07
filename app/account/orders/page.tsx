@@ -32,7 +32,7 @@ export default function AccountOrdersPage() {
           </p>
           <Link
             href="/catalog"
-            className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 bg-brand text-white text-sm font-medium rounded-md hover:bg-brand-hover transition-colors"
+            className="mt-4 inline-flex min-h-[44px] items-center gap-2 px-4 py-2.5 bg-brand text-white text-sm font-medium rounded-md hover:bg-brand-hover transition-colors"
           >
             Browse catalog
           </Link>

@@ -9,11 +9,9 @@ import { ProductCard } from "@/components/store/ProductCard";
 import { ProductGallery } from "@/components/store/ProductGallery";
 import { ProductActions } from "@/components/store/ProductActions";
 import { ChevronRight, Truck, Store, RotateCcw } from "lucide-react";
+import { FOCUS_RING } from "@/lib/focus";
 
 export const dynamic = "force-dynamic";
-
-const FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;

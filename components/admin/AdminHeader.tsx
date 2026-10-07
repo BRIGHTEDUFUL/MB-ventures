@@ -22,14 +22,14 @@ export function AdminHeader({ title, description, breadcrumbs, actions }: AdminH
           aria-label="Admin Breadcrumbs"
           className="flex items-center gap-1.5 text-xs text-ink-muted font-mono mb-2"
         >
-          <Link href="/admin" className="hover:text-ink transition-colors">
+          <Link href="/admin" className="min-h-11 inline-flex items-center hover:text-ink transition-colors">
             Admin
           </Link>
           {breadcrumbs.map((b, i) => (
             <React.Fragment key={i}>
               <ChevronRight className="w-3.5 h-3.5 text-ink-subtle shrink-0" />
               {b.href ? (
-                <Link href={b.href} className="hover:text-ink transition-colors">
+                <Link href={b.href} className="min-h-11 inline-flex items-center hover:text-ink transition-colors">
                   {b.label}
                 </Link>
               ) : (

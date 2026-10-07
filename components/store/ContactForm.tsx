@@ -7,6 +7,7 @@ import { CheckCircle2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { FOCUS_RING } from "@/lib/focus";
 import { api } from "@/convex/_generated/api";
 import {
   Form,
@@ -67,9 +68,6 @@ const TEXT_FIELDS = [
     placeholder: "e.g. 024 123 4567",
   },
 ] as const;
-
-const FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
 
 export function ContactForm() {
   const createMessage = useMutation(api.contactMessages.create);

@@ -4,6 +4,7 @@ import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Container } from "@/components/shared/Container";
 import { ProductCard } from "@/components/store/ProductCard";
+import { FOCUS_RING } from "@/lib/focus";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,9 +21,6 @@ export const metadata: Metadata = {
   description:
     "Browse our complete catalog of ergonomic chairs, motorized standing desks, mechanical keyboards, monitors, and PC hardware.",
 };
-
-const FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
 
 const SORT_OPTIONS = [
   { value: "latest", label: "Newest" },

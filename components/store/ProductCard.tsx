@@ -58,7 +58,7 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="group flex flex-col h-full bg-surface border border-line hover:border-line-strong rounded-lg p-3 sm:p-4 transition-colors duration-150 relative">
+    <div className="group flex flex-col h-full bg-surface border border-line hover:border-line-strong rounded-lg p-3 sm:p-4 transition-all duration-200 relative hover-lift">
       {/* Product Image Container */}
       <Link
         href={`/product/${product.slug}`}
@@ -71,11 +71,11 @@ export function ProductCard({ product }: ProductCardProps) {
             width={300}
             height={300}
             unoptimized
-            className="w-full h-full object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+            className="w-full h-full object-contain transition-transform duration-200 group-hover:scale-[1.04]"
           />
         ) : (
           <div className="flex flex-col items-center justify-center text-ink-subtle">
-            <Package className="w-10 h-10 stroke-[1.25] text-ink-muted mb-1" />
+            <Package className="w-10 h-10 stroke-[1.25] text-ink-muted mb-1 transition-colors duration-200 group-hover:text-brand" />
             <span className="text-[11px] font-mono">MB Ventures</span>
           </div>
         )}
@@ -147,12 +147,12 @@ export function ProductCard({ product }: ProductCardProps) {
             disabled={isOutOfStock}
             onClick={handleQuickAdd}
             aria-label={`Add ${product.name} to cart`}
-            className={`shrink-0 min-h-[44px] px-2 rounded-md text-xs font-semibold flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ${
+            className={`shrink-0 min-h-[44px] px-2 rounded-md text-xs font-semibold flex items-center justify-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus active-press ${
               isOutOfStock
                 ? "bg-canvas-strong text-ink-subtle cursor-not-allowed"
                 : isAdded
-                  ? "bg-success text-surface"
-                  : "bg-brand text-white hover:bg-brand-hover active:bg-brand-active"
+                  ? "bg-success text-surface animate-scale-in"
+                  : "bg-brand text-white hover:bg-brand-hover hover:shadow-md active:bg-brand-active"
             }`}
           >
             <span>{isAdded ? "Added" : "Add"}</span>

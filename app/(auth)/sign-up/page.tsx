@@ -7,6 +7,15 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
+/** Returns the first rule the password breaks, or null when it passes. */
+function passwordProblem(password: string): string | null {
+  if (password.length < 8) return "Password must be at least 8 characters.";
+  if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+    return "Password must include at least one letter and one number.";
+  }
+  return null;
+}
+
 function SignUpForm() {
   const { signIn } = useAuthActions();
   const router = useRouter();
@@ -21,8 +30,9 @@ function SignUpForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name || !email || !password) return;
-    if (password.length < 8) {
-      toast.error("Password must be at least 8 characters.");
+    const problem = passwordProblem(password);
+    if (problem) {
+      toast.error(problem);
       return;
     }
     setLoading(true);
@@ -90,7 +100,6 @@ function SignUpForm() {
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-ink mb-1.5">
             Password
-            <span className="text-ink-subtle font-normal ml-1">(min. 8 characters)</span>
           </label>
           <input
             id="password"
@@ -98,11 +107,15 @@ function SignUpForm() {
             autoComplete="new-password"
             required
             minLength={8}
+            aria-describedby="password-help"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             className="w-full h-11 px-3 rounded-md border border-line-strong bg-surface text-ink text-sm placeholder:text-ink-subtle focus:outline-none focus:ring-2 focus:ring-focus focus:border-focus transition-colors"
           />
+          <p id="password-help" className="text-xs text-ink-subtle mt-1.5">
+            Use at least 8 characters, including a letter and a number.
+          </p>
         </div>
 
         <button

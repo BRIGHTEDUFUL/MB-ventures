@@ -190,7 +190,7 @@ export default function AdminCategoriesPage() {
           <button
             type="button"
             onClick={handleOpenCreate}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-brand text-white text-xs font-semibold hover:bg-brand-hover transition-colors"
+            className="inline-flex items-center gap-1.5 h-11 px-3.5 py-2 rounded-md bg-brand text-white text-xs font-semibold hover:bg-brand-hover transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add Category</span>
@@ -216,7 +216,7 @@ export default function AdminCategoriesPage() {
             <button
               type="button"
               onClick={handleOpenCreate}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-brand text-white text-xs font-semibold"
+              className="inline-flex items-center gap-1.5 h-11 px-4 py-2 rounded-md bg-brand text-white text-xs font-semibold"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Create Category</span>
@@ -288,7 +288,7 @@ export default function AdminCategoriesPage() {
                             onClick={() =>
                               toggleActive({ id: parent._id, isActive: !parent.isActive })
                             }
-                            className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-colors ${
+                            className={`h-11 px-2 py-0.5 rounded text-[11px] font-semibold transition-colors ${
                               parent.isActive
                                 ? "bg-success-soft text-success"
                                 : "bg-canvas-strong text-ink-subtle"
@@ -302,7 +302,7 @@ export default function AdminCategoriesPage() {
                             <button
                               type="button"
                               onClick={() => handleOpenEdit(parent)}
-                              className="p-1.5 rounded hover:bg-canvas text-ink-muted hover:text-ink transition-colors"
+                              className="w-11 h-11 inline-flex items-center justify-center rounded hover:bg-canvas text-ink-muted hover:text-ink transition-colors"
                               title="Edit category"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
@@ -313,7 +313,7 @@ export default function AdminCategoriesPage() {
                                 setCategoryToDelete({ id: parent._id, name: parent.name });
                                 setDeleteDialogOpen(true);
                               }}
-                              className="p-1.5 rounded hover:bg-danger-soft text-ink-muted hover:text-danger transition-colors"
+                              className="w-11 h-11 inline-flex items-center justify-center rounded hover:bg-danger-soft text-ink-muted hover:text-danger transition-colors"
                               title="Delete category"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -364,7 +364,7 @@ export default function AdminCategoriesPage() {
                               onClick={() =>
                                 toggleActive({ id: child._id, isActive: !child.isActive })
                               }
-                              className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-colors ${
+                              className={`h-11 px-2 py-0.5 rounded text-[11px] font-semibold transition-colors ${
                                 child.isActive
                                   ? "bg-success-soft text-success"
                                   : "bg-canvas-strong text-ink-subtle"
@@ -378,7 +378,7 @@ export default function AdminCategoriesPage() {
                               <button
                                 type="button"
                                 onClick={() => handleOpenEdit(child)}
-                                className="p-1.5 rounded hover:bg-canvas text-ink-muted hover:text-ink transition-colors"
+                                className="w-11 h-11 inline-flex items-center justify-center rounded hover:bg-canvas text-ink-muted hover:text-ink transition-colors"
                                 title="Edit subcategory"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
@@ -389,7 +389,7 @@ export default function AdminCategoriesPage() {
                                   setCategoryToDelete({ id: child._id, name: child.name });
                                   setDeleteDialogOpen(true);
                                 }}
-                                className="p-1.5 rounded hover:bg-danger-soft text-ink-muted hover:text-danger transition-colors"
+                                className="w-11 h-11 inline-flex items-center justify-center rounded hover:bg-danger-soft text-ink-muted hover:text-danger transition-colors"
                                 title="Delete subcategory"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -441,7 +441,7 @@ export default function AdminCategoriesPage() {
                 <button
                   type="button"
                   onClick={() => setIsEditingSlug(!isEditingSlug)}
-                  className="text-[11px] text-accent hover:underline font-mono"
+                  className="min-h-11 inline-flex items-center text-[11px] text-accent hover:underline font-mono"
                 >
                   {isEditingSlug ? "Auto-generate from name" : "Edit manually"}
                 </button>
@@ -542,7 +542,7 @@ export default function AdminCategoriesPage() {
                       <button
                         type="button"
                         onClick={() => handleRemoveSpecTemplate(i)}
-                        className="text-ink-subtle hover:text-danger ml-1"
+                        className="min-h-11 min-w-11 -my-1.5 -mr-1.5 ml-1 inline-flex items-center justify-center text-ink-subtle hover:text-danger"
                       >
                         <X className="w-3 h-3" />
                       </button>

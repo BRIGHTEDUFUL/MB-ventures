@@ -1,8 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import type { Components } from "react-markdown";
-
-const FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
+import { FOCUS_RING } from "@/lib/focus";
 
 const SAFE_SCHEMES = new Set(["http", "https", "mailto", "tel"]);
 

@@ -3,6 +3,7 @@ import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Container } from "@/components/shared/Container";
 import { ContactForm } from "@/components/store/ContactForm";
+import { FOCUS_RING } from "@/lib/focus";
 import { Mail, MapPin, MessageCircle, Phone, type LucideIcon } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -12,9 +13,6 @@ export const metadata: Metadata = {
   description:
     "Reach the shop about an order, delivery, pickup, or a product by email, phone, WhatsApp, or the contact form.",
 };
-
-const FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
 
 interface ShopDetail {
   label: string;

@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { Logo } from "@/components/shared/Logo";
 import { Search, ShoppingBag, User, Menu, ShieldCheck, LogOut, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
@@ -25,13 +27,12 @@ interface HeaderProps {
     name: string;
     slug: string;
   }>;
-  shopName: string;
   supportPhone: string;
   whatsappNumber: string;
   cartCount?: number;
 }
 
-export function Header({ categories, shopName, supportPhone, whatsappNumber }: HeaderProps) {
+export function Header({ categories, supportPhone, whatsappNumber }: HeaderProps) {
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading } = useCurrentUser();
   const { signOut } = useAuthActions();
@@ -39,10 +40,20 @@ export function Header({ categories, shopName, supportPhone, whatsappNumber }: H
 
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Track scroll position for header shadow
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-surface border-b border-line transition-shadow duration-200">
+      <header className={`sticky top-0 z-40 w-full bg-surface border-b border-line transition-shadow duration-200 ${isScrolled ? "shadow-md" : ""}`}>
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           {/* Left: Mobile hamburger + Brand logo */}
           <div className="flex items-center gap-3">
@@ -57,12 +68,9 @@ export function Header({ categories, shopName, supportPhone, whatsappNumber }: H
 
             <Link
               href="/"
-              className="flex items-center gap-2 text-ink font-heading font-bold text-lg sm:text-xl tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus rounded-sm py-1"
+              className="flex min-h-[44px] items-center gap-2 text-ink font-heading font-bold text-lg sm:text-xl tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus rounded-sm py-1"
             >
-              <span className="w-7 h-7 bg-ink text-surface rounded flex items-center justify-center text-xs font-mono font-bold shrink-0">
-                MB
-              </span>
-              <span className="truncate">{shopName || "MB Ventures GH"}</span>
+              <Logo size="sm" variant="text" href="/" />
             </Link>
           </div>
 
@@ -141,14 +149,14 @@ export function Header({ categories, shopName, supportPhone, whatsappNumber }: H
                     </strong>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-line" />
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem asChild className="min-h-[44px]">
                     <Link href="/account" className="cursor-pointer">
                       <User className="w-4 h-4 mr-2 text-ink-muted" />
                       <span>My Account & Orders</span>
                     </Link>
                   </DropdownMenuItem>
                   {user.role === "admin" && (
-                    <DropdownMenuItem asChild>
+                    <DropdownMenuItem asChild className="min-h-[44px]">
                       <Link href="/admin" className="cursor-pointer">
                         <ShieldCheck className="w-4 h-4 mr-2 text-link" />
                         <span>Admin Dashboard</span>
@@ -158,7 +166,7 @@ export function Header({ categories, shopName, supportPhone, whatsappNumber }: H
                   <DropdownMenuSeparator className="bg-line" />
                   <DropdownMenuItem
                     onClick={() => signOut()}
-                    className="cursor-pointer text-danger focus:text-danger focus:bg-danger/10"
+                    className="min-h-[44px] cursor-pointer text-danger focus:text-danger focus:bg-danger/10"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     <span>Sign Out</span>

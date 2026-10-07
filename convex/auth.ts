@@ -23,6 +23,16 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
           createdAt: Date.now(),
         };
       },
+      // Replaces the provider's default (length >= 8 only). Runs on the
+      // "signUp" and "reset-verification" flows, so existing accounts whose
+      // passwords predate this rule can still sign in.
+      validatePasswordRequirements: (password) => {
+        if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+          throw new Error(
+            "Password must be at least 8 characters and include a letter and a number."
+          );
+        }
+      },
     }),
   ],
 });

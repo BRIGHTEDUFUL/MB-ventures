@@ -113,7 +113,7 @@ export default function AccountOrderDetailPage() {
         <p className="text-ink-muted text-sm mt-1">This order does not belong to your account.</p>
         <Link
           href="/account/orders"
-          className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 bg-brand text-white text-sm font-medium rounded-md hover:bg-brand-hover transition-colors"
+          className="mt-4 inline-flex min-h-[44px] items-center gap-2 px-4 py-2.5 bg-brand text-white text-sm font-medium rounded-md hover:bg-brand-hover transition-colors"
         >
           Back to orders
         </Link>
@@ -176,7 +176,7 @@ export default function AccountOrderDetailPage() {
       {/* Back link */}
       <Link
         href="/account/orders"
-        className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink transition-colors"
+        className="inline-flex min-h-[44px] items-center gap-1.5 text-sm text-ink-muted hover:text-ink transition-colors"
       >
         <ChevronLeft className="w-4 h-4" />
         Back to orders
@@ -328,7 +328,7 @@ export default function AccountOrderDetailPage() {
                   href={`https://maps.google.com/?q=${encodeURIComponent(order.pickupSnapshot.address)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-link hover:underline mt-1"
+                  className="inline-flex min-h-[44px] items-center gap-1 text-xs text-link hover:underline mt-1"
                 >
                   Get directions <ExternalLink className="w-3 h-3" />
                 </a>

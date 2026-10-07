@@ -10,6 +10,7 @@ import {
 } from "./lib/validators";
 import type { OrderStatus, PaymentStatus } from "./lib/constants";
 import type { Id } from "./_generated/dataModel";
+import { triggerOrderConfirmation, triggerNewOrderAdmin } from "./emails/triggers";
 
 /**
  * Public mutation: Create an order from customer checkout.
@@ -298,6 +299,36 @@ export const create = mutation({
           updatedAt: now,
         });
       }
+    }
+
+    // 12. Send order confirmation and admin alert emails
+    const order = await ctx.db.get(orderId);
+    if (order) {
+      const siteUrl = process.env.SITE_URL || "http://localhost:3000";
+      const shopName = siteSettings?.shopName || "MB Ventures GH";
+      const shopAddress = siteSettings?.address;
+      const contactEmail = siteSettings?.contactEmail;
+      const contactPhone = siteSettings?.contactPhone;
+
+      // Send customer confirmation
+      await triggerOrderConfirmation(ctx, {
+        order,
+        siteUrl,
+        shopName,
+        shopAddress,
+        contactEmail,
+        contactPhone,
+      });
+
+      // Send admin alert
+      await triggerNewOrderAdmin(ctx, {
+        order,
+        siteUrl,
+        shopName,
+        shopAddress,
+        contactEmail,
+        contactPhone,
+      });
     }
 
     return {

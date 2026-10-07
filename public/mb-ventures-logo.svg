@@ -1,0 +1,32 @@
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- MB Text -->
+  <defs>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2563EB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#60A5FA;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#EA580C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F97316;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- M Letter -->
+  <path d="M15 40 L15 15 L25 30 L35 15 L35 40" stroke="url(#blueGradient)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- B Letter -->
+  <path d="M45 15 L45 40 L55 40 Q60 40 60 35 Q60 30 55 27.5 Q60 25 60 20 Q60 15 55 15 Z" fill="url(#orangeGradient)"/>
+  
+  <!-- VENTURES Text -->
+  <text x="10" y="52" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#FFFFFF" letter-spacing="2">VENTURES</text>
+  
+  <!-- GH Text -->
+  <text x="75" y="52" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="url(#orangeGradient)" letter-spacing="1">GH</text>
+  
+  <!-- Swoosh accent -->
+  <path d="M5 45 Q30 38 65 45" stroke="url(#blueGradient)" stroke-width="2" fill="none" opacity="0.6"/>
+  
+  <!-- Star accent -->
+  <circle cx="75" cy="18" r="1.5" fill="url(#orangeGradient)"/>
+  <circle cx="75" cy="18" r="3" fill="url(#orangeGradient)" opacity="0.3"/>
+</svg>

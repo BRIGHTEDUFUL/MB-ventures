@@ -4,6 +4,7 @@ import { requireAdmin } from "./users";
 import { buildSearchText } from "./lib/searchText";
 import { specItemValidator } from "./lib/validators";
 import type { Id } from "./_generated/dataModel";
+import { logAudit } from "./auditLogs";
 
 /**
  * Admin Query: List products with filters, sorting, and stock calculations.
@@ -392,7 +393,6 @@ export const adjustStock = mutation({
     available: v.number(),
   }),
   handler: async (ctx, args) => {
-    // TODO(audit): Step 25 writes an auditLogs row for this stock adjustment.
     const { user } = await requireAdmin(ctx);
 
     const note = args.note?.trim();
@@ -436,6 +436,16 @@ export const adjustStock = mutation({
       actorId: String(user._id),
       note: note || undefined,
       createdAt: now,
+    });
+
+    await logAudit(ctx, {
+      userId: user._id,
+      action: "update",
+      resourceType: "product",
+      resourceId: args.productId,
+      details: `Adjusted stock for "${product.name}": ${product.stock} → ${finalStock} (${delta > 0 ? "+" : ""}${delta}) - ${args.reason}`,
+      before: { stock: product.stock },
+      after: { stock: finalStock },
     });
 
     return { success: true as const, stock: finalStock, reserved, available };

@@ -35,7 +35,7 @@ export const renderSortControls = (
       disabled={reordering || index === 0}
       aria-label={`Move ${name} up`}
       title="Move up"
-      className={`p-1.5 rounded hover:bg-canvas text-ink-muted hover:text-ink transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${FOCUS_CLASS}`}
+      className={`w-11 h-11 inline-flex items-center justify-center rounded hover:bg-canvas text-ink-muted hover:text-ink transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${FOCUS_CLASS}`}
     >
       <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" />
     </button>
@@ -45,7 +45,7 @@ export const renderSortControls = (
       disabled={reordering || index === length - 1}
       aria-label={`Move ${name} down`}
       title="Move down"
-      className={`p-1.5 rounded hover:bg-canvas text-ink-muted hover:text-ink transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${FOCUS_CLASS}`}
+      className={`w-11 h-11 inline-flex items-center justify-center rounded hover:bg-canvas text-ink-muted hover:text-ink transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${FOCUS_CLASS}`}
     >
       <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
     </button>
@@ -65,7 +65,7 @@ export const renderActionButtons = (
       onClick={onEdit}
       aria-label={`${editLabel} ${name}`}
       title={editLabel}
-      className={`p-1.5 rounded hover:bg-canvas text-ink-muted hover:text-ink transition-colors ${FOCUS_CLASS}`}
+      className={`w-11 h-11 inline-flex items-center justify-center rounded hover:bg-canvas text-ink-muted hover:text-ink transition-colors ${FOCUS_CLASS}`}
     >
       <Edit2 className="w-3.5 h-3.5" aria-hidden="true" />
     </button>
@@ -74,7 +74,7 @@ export const renderActionButtons = (
       onClick={onDelete}
       aria-label={`${deleteLabel} ${name}`}
       title={deleteLabel}
-      className={`p-1.5 rounded hover:bg-danger-soft text-ink-muted hover:text-danger transition-colors ${FOCUS_CLASS}`}
+      className={`w-11 h-11 inline-flex items-center justify-center rounded hover:bg-danger-soft text-ink-muted hover:text-danger transition-colors ${FOCUS_CLASS}`}
     >
       <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
     </button>

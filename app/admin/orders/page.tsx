@@ -50,7 +50,7 @@ export default function AdminOrdersPage() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3.5 py-2 rounded-md transition-colors shrink-0 flex items-center gap-1.5 ${
+              className={`h-11 px-3.5 py-2 rounded-md transition-colors shrink-0 flex items-center gap-1.5 ${
                 isActive
                   ? "bg-brand text-white font-semibold"
                   : tab.highlight
@@ -217,7 +217,7 @@ export default function AdminOrdersPage() {
                     <td className="py-3.5 px-4 text-right whitespace-nowrap">
                       <Link
                         href={`/admin/orders/${order._id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md border border-line hover:border-line-strong hover:bg-surface text-ink text-xs font-semibold transition-colors"
+                        className="inline-flex items-center gap-1 h-11 px-3 py-1.5 rounded-md border border-line hover:border-line-strong hover:bg-surface text-ink text-xs font-semibold transition-colors"
                       >
                         <span>Inspect</span>
                         <ArrowRight className="w-3 h-3" />

@@ -197,7 +197,7 @@ export const PRIMARY_BTN =
 export const SECONDARY_BTN =
   "inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-md border border-line bg-surface text-xs font-semibold text-ink hover:bg-canvas transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
 export const ICON_BTN =
-  "p-1.5 rounded hover:bg-danger-soft text-ink-muted hover:text-danger transition-colors";
+  "w-11 h-11 inline-flex items-center justify-center rounded hover:bg-danger-soft text-ink-muted hover:text-danger transition-colors";
 export const SECTION_CLASS = "bg-surface border border-line rounded-lg p-5 space-y-4";
 
 /* -------------------------------------------------------------------------- */

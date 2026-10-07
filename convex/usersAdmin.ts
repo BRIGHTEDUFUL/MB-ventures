@@ -14,6 +14,7 @@ import {
   paymentStatusValidator,
   roleValidator,
 } from "./lib/validators";
+import { logAudit } from "./auditLogs";
 
 /** Search scans at most this many of the most recent users (documented limitation). */
 const USER_SEARCH_CAP = 1000;
@@ -214,7 +215,7 @@ export const adminUpdateRole = mutation({
   },
   returns: v.object({ ok: v.literal(true) }),
   handler: async (ctx, args) => {
-    const { userId: actorId } = await requireAdmin(ctx);
+    const { user, userId: actorId } = await requireAdmin(ctx);
 
     const target = await ctx.db.get(args.userId);
     if (!target) throw new Error("User not found.");
@@ -234,8 +235,17 @@ export const adminUpdateRole = mutation({
     }
 
     if (target.role !== args.role) {
-      // TODO(audit): Step 25 writes an auditLogs row for this role change.
       await ctx.db.patch(args.userId, { role: args.role });
+
+      await logAudit(ctx, {
+        userId: user._id,
+        action: "update",
+        resourceType: "user",
+        resourceId: args.userId,
+        details: `Changed role for ${target.name || target.email || "user"} from ${target.role} to ${args.role}`,
+        before: { role: target.role },
+        after: { role: args.role },
+      });
     }
 
     return { ok: true as const };

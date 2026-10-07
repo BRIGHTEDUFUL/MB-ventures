@@ -6,11 +6,9 @@ import { api } from "@/convex/_generated/api";
 import { Container } from "@/components/shared/Container";
 import { ProductCard } from "@/components/store/ProductCard";
 import { ChevronRight } from "lucide-react";
+import { FOCUS_RING } from "@/lib/focus";
 
 export const dynamic = "force-dynamic";
-
-const FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;

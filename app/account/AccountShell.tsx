@@ -54,7 +54,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
                     <Link
                       href={href}
                       className={[
-                        "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
+                        "flex min-h-[44px] items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
                         isActive ? "bg-brand text-white" : "text-ink hover:bg-canvas",
                       ].join(" ")}
                       aria-current={isActive ? "page" : undefined}
@@ -68,7 +68,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
               <li>
                 <button
                   onClick={() => signOut()}
-                  className="flex w-full items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-ink-muted hover:bg-canvas-strong hover:text-danger transition-colors"
+                  className="flex w-full min-h-[44px] items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-ink-muted hover:bg-canvas-strong hover:text-danger transition-colors"
                 >
                   <LogOut className="w-4 h-4 shrink-0" />
                   Sign out

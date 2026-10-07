@@ -5,12 +5,10 @@ import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { FOCUS_RING } from "@/lib/focus";
 import { ArrowRight, ChevronLeft, ChevronRight, Inbox } from "lucide-react";
 
 const PAGE_SIZE = 20;
-
-const FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
 
 export default function AdminMessagesPage() {
   const [unreadOnly, setUnreadOnly] = useState(false);

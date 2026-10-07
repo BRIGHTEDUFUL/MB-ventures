@@ -102,7 +102,7 @@ export default function OrderStatusPage() {
             </p>
             <Link
               href="/catalog"
-              className="inline-flex items-center justify-center px-5 py-2.5 rounded-md font-semibold text-sm bg-brand text-white hover:bg-brand-hover transition-colors"
+              className="inline-flex min-h-11 items-center justify-center px-5 py-2.5 rounded-md font-semibold text-sm bg-brand text-white hover:bg-brand-hover transition-colors"
             >
               Back to Catalog
             </Link>
@@ -196,7 +196,7 @@ export default function OrderStatusPage() {
             <button
               type="button"
               onClick={handleCopyOrderNumber}
-              className="text-ink-muted hover:text-ink p-1 rounded transition-colors"
+              className="text-ink-muted hover:text-ink w-11 h-11 -m-1.5 flex items-center justify-center rounded transition-colors"
               aria-label="Copy order number"
             >
               {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}

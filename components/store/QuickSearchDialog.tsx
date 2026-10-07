@@ -159,7 +159,7 @@ export function QuickSearchDialog({ open, onOpenChange }: QuickSearchDialogProps
             <button
               type="button"
               onClick={handleViewAll}
-              className="inline-flex items-center gap-1 font-medium text-ink hover:text-link focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus rounded"
+              className="inline-flex min-h-[44px] items-center gap-1 font-medium text-ink hover:text-link focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus rounded"
             >
               <span>View all results</span>
               <ArrowRight className="w-3.5 h-3.5" />

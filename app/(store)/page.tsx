@@ -4,6 +4,7 @@ import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Container } from "@/components/shared/Container";
 import { ProductCard } from "@/components/store/ProductCard";
+import { FOCUS_RING } from "@/lib/focus";
 import {
   Armchair,
   Layers,
@@ -19,9 +20,6 @@ import {
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
-
-const FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
 
 const CATEGORY_META: Record<string, { icon: LucideIcon; subtitle: string }> = {
   "ergonomic-chairs": {
@@ -209,11 +207,11 @@ export default async function HomePage() {
                 <Link
                   key={cat._id}
                   href={`/category/${cat.slug}`}
-                  className={`group flex flex-col bg-surface border border-line hover:border-line-strong rounded-lg overflow-hidden transition-colors duration-120 ease-snap ${FOCUS_RING}`}
+                  className={`group flex flex-col bg-surface border border-line hover:border-line-strong rounded-lg overflow-hidden transition-all duration-200 hover-lift ${FOCUS_RING}`}
                 >
-                  <div className="bg-canvas border-b border-line aspect-[4/3] flex items-center justify-center transition-colors duration-120 ease-snap group-hover:bg-brand-soft">
+                  <div className="bg-canvas border-b border-line aspect-[4/3] flex items-center justify-center transition-all duration-200 group-hover:bg-gradient-to-br group-hover:from-brand-soft group-hover:to-canvas">
                     <Icon
-                      className="w-6 h-6 text-ink-muted group-hover:text-brand transition-colors duration-120 ease-snap"
+                      className="w-6 h-6 text-ink-muted group-hover:text-brand transition-all duration-200 group-hover:scale-110"
                       strokeWidth={1.5}
                       aria-hidden="true"
                     />

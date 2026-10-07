@@ -124,7 +124,7 @@ export default function AdminPagesPage() {
                           href={`/admin/pages/${page._id}`}
                           aria-label={`Edit page ${page.title}`}
                           title="Edit page"
-                          className={`p-1.5 rounded hover:bg-canvas text-ink-muted hover:text-ink transition-colors ${FOCUS_CLASS}`}
+                          className={`w-11 h-11 inline-flex items-center justify-center rounded hover:bg-canvas text-ink-muted hover:text-ink transition-colors ${FOCUS_CLASS}`}
                         >
                           <Edit2 className="w-3.5 h-3.5" aria-hidden="true" />
                         </Link>
@@ -133,7 +133,7 @@ export default function AdminPagesPage() {
                           onClick={() => setDeleteTarget({ id: page._id, title: page.title })}
                           aria-label={`Delete page ${page.title}`}
                           title="Delete page"
-                          className={`p-1.5 rounded hover:bg-danger-soft text-ink-muted hover:text-danger transition-colors ${FOCUS_CLASS}`}
+                          className={`w-11 h-11 inline-flex items-center justify-center rounded hover:bg-danger-soft text-ink-muted hover:text-danger transition-colors ${FOCUS_CLASS}`}
                         >
                           <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                         </button>

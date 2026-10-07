@@ -9,28 +9,6 @@ import {
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 /**
- * Internal mutation called by Convex Auth after a user signs up.
- * Creates the user row with role "customer" and timestamps it.
- */
-export const createUser = internalMutation({
-  args: {
-    userId: v.id("users"),
-    name: v.optional(v.string()),
-    email: v.optional(v.string()),
-    phone: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.userId, {
-      name: args.name,
-      email: args.email,
-      phone: args.phone,
-      role: "customer",
-      createdAt: Date.now(),
-    });
-  },
-});
-
-/**
  * Returns the currently authenticated user's public profile, or null if not signed in.
  * Safe to call from any client component — returns only public-safe fields.
  */

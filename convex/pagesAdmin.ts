@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query, type MutationCtx } from "./_generated/server";
 import { requireAdmin } from "./users";
 import { RESERVED_SLUGS } from "./lib/reservedSlugs";
+import { logAudit } from "./auditLogs";
 
 /** Lowercase kebab slug, e.g. "delivery-and-returns". */
 const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -141,8 +142,7 @@ export const create = mutation({
   args: pageArgs,
   returns: v.object({ _id: v.id("pages") }),
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
-    // TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
+    const { user } = await requireAdmin(ctx);
 
     const { title, slug, body } = normalizeAndValidate(args);
     await assertSlugFree(ctx, slug);
@@ -156,6 +156,15 @@ export const create = mutation({
       sortOrder: args.sortOrder,
       updatedAt: Date.now(),
     });
+
+    await logAudit(ctx, {
+      userId: user._id,
+      action: "create",
+      resourceType: "page",
+      resourceId: _id,
+      details: `Created page "${title}" (${slug})`,
+    });
+
     return { _id };
   },
 });
@@ -168,14 +177,18 @@ export const update = mutation({
   args: { pageId: v.id("pages"), ...pageArgs },
   returns: v.object({ ok: v.literal(true) }),
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
-    // TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
+    const { user } = await requireAdmin(ctx);
 
     const page = await ctx.db.get(args.pageId);
     if (!page) throw new Error("Page not found.");
 
     const { title, slug, body } = normalizeAndValidate(args);
     await assertSlugFree(ctx, slug, args.pageId);
+
+    const changes: string[] = [];
+    if (page.title !== title) changes.push(`title: "${page.title}" → "${title}"`);
+    if (page.slug !== slug) changes.push(`slug: "${page.slug}" → "${slug}"`);
+    if (page.isPublished !== args.isPublished) changes.push(`published: ${page.isPublished} → ${args.isPublished}`);
 
     await ctx.db.patch(args.pageId, {
       title,
@@ -186,6 +199,19 @@ export const update = mutation({
       sortOrder: args.sortOrder,
       updatedAt: Date.now(),
     });
+
+    if (changes.length > 0) {
+      await logAudit(ctx, {
+        userId: user._id,
+        action: "update",
+        resourceType: "page",
+        resourceId: args.pageId,
+        details: `Updated page "${title}": ${changes.join(", ")}`,
+        before: { title: page.title, slug: page.slug, isPublished: page.isPublished },
+        after: { title, slug, isPublished: args.isPublished },
+      });
+    }
+
     return { ok: true } as const;
   },
 });
@@ -197,13 +223,22 @@ export const remove = mutation({
   args: { pageId: v.id("pages") },
   returns: v.object({ ok: v.literal(true) }),
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
-    // TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
+    const { user } = await requireAdmin(ctx);
 
     const page = await ctx.db.get(args.pageId);
     if (!page) throw new Error("Page not found.");
 
     await ctx.db.delete(args.pageId);
+
+    await logAudit(ctx, {
+      userId: user._id,
+      action: "delete",
+      resourceType: "page",
+      resourceId: args.pageId,
+      details: `Deleted page "${page.title}" (${page.slug})`,
+      before: { title: page.title, slug: page.slug },
+    });
+
     return { ok: true } as const;
   },
 });

@@ -13,7 +13,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       {/* Minimal header */}
       <header className="border-b border-line bg-surface">
         <Container className="h-14 flex items-center">
-          <Link href="/" className="font-heading font-semibold text-ink text-base tracking-tight">
+          <Link href="/" className="inline-flex min-h-[44px] items-center font-heading font-semibold text-ink text-base tracking-tight">
             MB Ventures GH
           </Link>
         </Container>

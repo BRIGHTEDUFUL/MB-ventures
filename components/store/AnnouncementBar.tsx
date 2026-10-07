@@ -40,7 +40,7 @@ export function AnnouncementBar({ announcement }: AnnouncementBarProps) {
           {announcement.link && (
             <Link
               href={announcement.link}
-              className="underline font-medium text-ink hover:text-ink-muted shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus rounded-sm"
+              className="min-h-[44px] inline-flex items-center underline font-medium text-ink hover:text-ink-muted shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus rounded-sm"
             >
               View details
             </Link>

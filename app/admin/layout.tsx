@@ -168,7 +168,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div>
           {/* Admin Header / Logo */}
           <div className="h-16 px-6 border-b border-line flex items-center justify-between">
-            <Link href="/admin" className="flex items-center gap-2">
+            <Link href="/admin" className="flex items-center gap-2 min-h-11">
               <span className="w-7 h-7 bg-ink text-surface rounded flex items-center justify-center text-xs font-mono font-bold shrink-0">
                 MB
               </span>
@@ -192,7 +192,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-md text-xs font-medium transition-colors ${
+                  className={`flex items-center justify-between min-h-11 px-3 py-2.5 rounded-md text-xs font-medium transition-colors ${
                     isActive
                       ? "bg-brand text-white font-semibold"
                       : "text-ink-muted hover:text-ink hover:bg-canvas"
@@ -225,7 +225,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link
             href="/"
             target="_blank"
-            className="flex items-center justify-between px-3 py-2 rounded-md border border-line bg-canvas hover:bg-canvas-strong text-xs font-medium text-ink transition-colors"
+            className="flex items-center justify-between min-h-11 px-3 py-2 rounded-md border border-line bg-canvas hover:bg-canvas-strong text-xs font-medium text-ink transition-colors"
           >
             <div className="flex items-center gap-2">
               <Store className="w-3.5 h-3.5 text-ink-muted" />
@@ -247,7 +247,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               onClick={() => signOut()}
               title="Sign Out"
               aria-label="Sign Out"
-              className="p-1.5 text-ink-muted hover:text-danger rounded hover:bg-surface transition-colors"
+              className="w-11 h-11 inline-flex items-center justify-center text-ink-muted hover:text-danger rounded hover:bg-surface transition-colors"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -272,7 +272,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {pendingMoMoCount > 0 && (
           <Link
             href="/admin/orders"
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-accent-soft text-accent text-xs font-mono font-semibold"
+            className="flex items-center gap-1.5 min-h-11 px-2.5 py-1 rounded bg-accent-soft text-accent text-xs font-mono font-semibold"
           >
             <span>MoMo Action:</span>
             <span>{pendingMoMoCount}</span>
@@ -301,7 +301,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileDrawerOpen(false)}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-md text-xs font-medium transition-colors ${
+                  className={`flex items-center justify-between min-h-11 px-3 py-2.5 rounded-md text-xs font-medium transition-colors ${
                     isActive
                       ? "bg-brand text-white font-semibold"
                       : "text-ink-muted hover:text-ink hover:bg-canvas"
@@ -329,7 +329,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               href="/"
               target="_blank"
               onClick={() => setMobileDrawerOpen(false)}
-              className="flex items-center justify-between px-3 py-2 rounded-md border border-line bg-canvas text-xs font-medium text-ink"
+              className="flex items-center justify-between min-h-11 px-3 py-2 rounded-md border border-line bg-canvas text-xs font-medium text-ink"
             >
               <span>View Storefront</span>
               <ExternalLink className="w-3.5 h-3.5" />

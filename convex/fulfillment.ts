@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireAdmin } from "./users";
+import { logAudit } from "./auditLogs";
 
 /** Shared argument validators for creating and updating a delivery zone. */
 const deliveryZoneArgs = {
@@ -125,36 +126,44 @@ export const adminListPickupLocations = query({
 /**
  * Admin Mutation: Create a delivery zone.
  */
-// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
 export const createDeliveryZone = mutation({
   args: deliveryZoneArgs,
   returns: v.id("deliveryZones"),
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const { user } = await requireAdmin(ctx);
 
     const name = requireNonEmpty(args.name, "Zone name");
     const estimatedDays = requireNonEmpty(args.estimatedDays, "Estimated delivery time");
     validateFee(args.fee);
     validateSortOrder(args.sortOrder);
 
-    return await ctx.db.insert("deliveryZones", {
+    const zoneId = await ctx.db.insert("deliveryZones", {
       name,
       fee: args.fee,
       estimatedDays,
       isActive: args.isActive,
       sortOrder: args.sortOrder,
     });
+
+    await logAudit(ctx, {
+      userId: user._id,
+      action: "create",
+      resourceType: "delivery_zone",
+      resourceId: zoneId,
+      details: `Created delivery zone "${name}" (fee: GHS ${(args.fee / 100).toFixed(2)})`,
+    });
+
+    return zoneId;
   },
 });
 
 /**
  * Admin Mutation: Update a delivery zone.
  */
-// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
 export const updateDeliveryZone = mutation({
   args: { id: v.id("deliveryZones"), ...deliveryZoneArgs },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const { user } = await requireAdmin(ctx);
 
     const zone = await ctx.db.get(args.id);
     if (!zone) throw new Error("Delivery zone not found.");
@@ -164,6 +173,11 @@ export const updateDeliveryZone = mutation({
     validateFee(args.fee);
     validateSortOrder(args.sortOrder);
 
+    const changes: string[] = [];
+    if (zone.name !== name) changes.push(`name: "${zone.name}" → "${name}"`);
+    if (zone.fee !== args.fee) changes.push(`fee: ${zone.fee} → ${args.fee}`);
+    if (zone.isActive !== args.isActive) changes.push(`active: ${zone.isActive} → ${args.isActive}`);
+
     await ctx.db.patch(args.id, {
       name,
       fee: args.fee,
@@ -171,6 +185,18 @@ export const updateDeliveryZone = mutation({
       isActive: args.isActive,
       sortOrder: args.sortOrder,
     });
+
+    if (changes.length > 0) {
+      await logAudit(ctx, {
+        userId: user._id,
+        action: "update",
+        resourceType: "delivery_zone",
+        resourceId: args.id,
+        details: `Updated delivery zone "${name}": ${changes.join(", ")}`,
+        before: { name: zone.name, fee: zone.fee, isActive: zone.isActive },
+        after: { name, fee: args.fee, isActive: args.isActive },
+      });
+    }
   },
 });
 
@@ -178,12 +204,11 @@ export const updateDeliveryZone = mutation({
  * Admin Mutation: Delete a delivery zone, unless existing orders reference it —
  * then deactivate it instead so historical orders keep their snapshot.
  */
-// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
 export const removeDeliveryZone = mutation({
   args: { id: v.id("deliveryZones") },
   returns: v.object({ deleted: v.boolean(), deactivated: v.boolean() }),
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const { user } = await requireAdmin(ctx);
 
     const zone = await ctx.db.get(args.id);
     if (!zone) throw new Error("Delivery zone not found.");
@@ -196,10 +221,24 @@ export const removeDeliveryZone = mutation({
 
     if (referencedOrder) {
       await ctx.db.patch(args.id, { isActive: false });
+      await logAudit(ctx, {
+        userId: user._id,
+        action: "update",
+        resourceType: "delivery_zone",
+        resourceId: args.id,
+        details: `Deactivated delivery zone "${zone.name}" (referenced by orders)`,
+      });
       return { deleted: false, deactivated: true };
     }
 
     await ctx.db.delete(args.id);
+    await logAudit(ctx, {
+      userId: user._id,
+      action: "delete",
+      resourceType: "delivery_zone",
+      resourceId: args.id,
+      details: `Deleted delivery zone "${zone.name}"`,
+    });
     return { deleted: true, deactivated: false };
   },
 });
@@ -207,28 +246,37 @@ export const removeDeliveryZone = mutation({
 /**
  * Admin Mutation: Activate or deactivate a delivery zone.
  */
-// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
 export const toggleDeliveryZoneActive = mutation({
   args: { id: v.id("deliveryZones"), isActive: v.boolean() },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const { user } = await requireAdmin(ctx);
 
     const zone = await ctx.db.get(args.id);
     if (!zone) throw new Error("Delivery zone not found.");
 
-    await ctx.db.patch(args.id, { isActive: args.isActive });
+    if (zone.isActive !== args.isActive) {
+      await ctx.db.patch(args.id, { isActive: args.isActive });
+      await logAudit(ctx, {
+        userId: user._id,
+        action: "update",
+        resourceType: "delivery_zone",
+        resourceId: args.id,
+        details: `${args.isActive ? "Activated" : "Deactivated"} delivery zone "${zone.name}"`,
+        before: { isActive: zone.isActive },
+        after: { isActive: args.isActive },
+      });
+    }
   },
 });
 
 /**
  * Admin Mutation: Create a pickup location.
  */
-// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
 export const createPickupLocation = mutation({
   args: pickupLocationArgs,
   returns: v.id("pickupLocations"),
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const { user } = await requireAdmin(ctx);
 
     const name = requireNonEmpty(args.name, "Location name");
     const address = requireNonEmpty(args.address, "Address");
@@ -236,7 +284,7 @@ export const createPickupLocation = mutation({
     const openingHours = requireNonEmpty(args.openingHours, "Opening hours");
     validateSortOrder(args.sortOrder);
 
-    return await ctx.db.insert("pickupLocations", {
+    const locationId = await ctx.db.insert("pickupLocations", {
       name,
       address,
       phone,
@@ -244,17 +292,26 @@ export const createPickupLocation = mutation({
       isActive: args.isActive,
       sortOrder: args.sortOrder,
     });
+
+    await logAudit(ctx, {
+      userId: user._id,
+      action: "create",
+      resourceType: "pickup_location",
+      resourceId: locationId,
+      details: `Created pickup location "${name}"`,
+    });
+
+    return locationId;
   },
 });
 
 /**
  * Admin Mutation: Update a pickup location.
  */
-// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
 export const updatePickupLocation = mutation({
   args: { id: v.id("pickupLocations"), ...pickupLocationArgs },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const { user } = await requireAdmin(ctx);
 
     const location = await ctx.db.get(args.id);
     if (!location) throw new Error("Pickup location not found.");
@@ -265,6 +322,11 @@ export const updatePickupLocation = mutation({
     const openingHours = requireNonEmpty(args.openingHours, "Opening hours");
     validateSortOrder(args.sortOrder);
 
+    const changes: string[] = [];
+    if (location.name !== name) changes.push(`name: "${location.name}" → "${name}"`);
+    if (location.address !== address) changes.push(`address changed`);
+    if (location.isActive !== args.isActive) changes.push(`active: ${location.isActive} → ${args.isActive}`);
+
     await ctx.db.patch(args.id, {
       name,
       address,
@@ -273,6 +335,18 @@ export const updatePickupLocation = mutation({
       isActive: args.isActive,
       sortOrder: args.sortOrder,
     });
+
+    if (changes.length > 0) {
+      await logAudit(ctx, {
+        userId: user._id,
+        action: "update",
+        resourceType: "pickup_location",
+        resourceId: args.id,
+        details: `Updated pickup location "${name}": ${changes.join(", ")}`,
+        before: { name: location.name, isActive: location.isActive },
+        after: { name, isActive: args.isActive },
+      });
+    }
   },
 });
 
@@ -280,12 +354,11 @@ export const updatePickupLocation = mutation({
  * Admin Mutation: Delete a pickup location, unless existing orders reference it —
  * then deactivate it instead so historical orders keep their snapshot.
  */
-// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
 export const removePickupLocation = mutation({
   args: { id: v.id("pickupLocations") },
   returns: v.object({ deleted: v.boolean(), deactivated: v.boolean() }),
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const { user } = await requireAdmin(ctx);
 
     const location = await ctx.db.get(args.id);
     if (!location) throw new Error("Pickup location not found.");
@@ -298,10 +371,24 @@ export const removePickupLocation = mutation({
 
     if (referencedOrder) {
       await ctx.db.patch(args.id, { isActive: false });
+      await logAudit(ctx, {
+        userId: user._id,
+        action: "update",
+        resourceType: "pickup_location",
+        resourceId: args.id,
+        details: `Deactivated pickup location "${location.name}" (referenced by orders)`,
+      });
       return { deleted: false, deactivated: true };
     }
 
     await ctx.db.delete(args.id);
+    await logAudit(ctx, {
+      userId: user._id,
+      action: "delete",
+      resourceType: "pickup_location",
+      resourceId: args.id,
+      details: `Deleted pickup location "${location.name}"`,
+    });
     return { deleted: true, deactivated: false };
   },
 });
@@ -309,15 +396,25 @@ export const removePickupLocation = mutation({
 /**
  * Admin Mutation: Activate or deactivate a pickup location.
  */
-// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
 export const togglePickupLocationActive = mutation({
   args: { id: v.id("pickupLocations"), isActive: v.boolean() },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const { user } = await requireAdmin(ctx);
 
     const location = await ctx.db.get(args.id);
     if (!location) throw new Error("Pickup location not found.");
 
-    await ctx.db.patch(args.id, { isActive: args.isActive });
+    if (location.isActive !== args.isActive) {
+      await ctx.db.patch(args.id, { isActive: args.isActive });
+      await logAudit(ctx, {
+        userId: user._id,
+        action: "update",
+        resourceType: "pickup_location",
+        resourceId: args.id,
+        details: `${args.isActive ? "Activated" : "Deactivated"} pickup location "${location.name}"`,
+        before: { isActive: location.isActive },
+        after: { isActive: args.isActive },
+      });
+    }
   },
 });

@@ -36,7 +36,7 @@ Rules: every text token has at least 4.5:1 against surface and canvas; control b
 - Sentence case everywhere. No all-caps except micro labels at 0.75rem with 0.06em tracking, used sparingly.
 
 ## Layout
-- Container max-width 1280px; gutters 16px mobile, 24px tablet, 32px desktop. 8px spacing scale.
+- Container max-width 1280px; gutters 16px mobile, 24px tablet, 32px desktop. 4px spacing scale; section rhythm in 8px multiples.
 - Section vertical rhythm: 96px desktop, 72px tablet, 48px mobile; vary density (not every section the same).
 - Product grids: 2 columns mobile, 3 tablet, 4 desktop (5 only on wide listing pages with filters collapsed).
 - Prefer asymmetric two-column compositions for editorial blocks and strict grids for products.

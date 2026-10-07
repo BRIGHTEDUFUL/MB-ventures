@@ -208,7 +208,7 @@ export function ProductForm({ initialData, onSubmit, isSubmitting = false }: Pro
         <button
           type="button"
           onClick={() => router.push("/admin/products")}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-muted hover:text-ink transition-colors p-1"
+          className="inline-flex items-center gap-1.5 min-h-11 p-1 text-xs font-semibold text-ink-muted hover:text-ink transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Products</span>
@@ -218,7 +218,7 @@ export function ProductForm({ initialData, onSubmit, isSubmitting = false }: Pro
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-brand text-white text-xs font-semibold hover:bg-brand-hover transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 h-11 px-4 py-2 rounded-md bg-brand text-white text-xs font-semibold hover:bg-brand-hover transition-colors disabled:opacity-50"
           >
             <Save className="w-3.5 h-3.5" />
             <span>
@@ -261,7 +261,7 @@ export function ProductForm({ initialData, onSubmit, isSubmitting = false }: Pro
                 <button
                   type="button"
                   onClick={() => setIsEditingSlug(!isEditingSlug)}
-                  className="text-[11px] text-accent hover:underline font-mono"
+                  className="min-h-11 inline-flex items-center text-[11px] text-accent hover:underline font-mono"
                 >
                   {isEditingSlug ? "Auto-generate from name" : "Edit manually"}
                 </button>
@@ -337,7 +337,7 @@ export function ProductForm({ initialData, onSubmit, isSubmitting = false }: Pro
                 <button
                   type="button"
                   onClick={() => setDescTab("write")}
-                  className={`px-3 py-1 flex items-center gap-1 font-medium transition-colors ${
+                  className={`h-11 px-3 flex items-center gap-1 font-medium transition-colors ${
                     descTab === "write"
                       ? "bg-brand text-white"
                       : "bg-surface text-ink hover:bg-canvas"
@@ -349,7 +349,7 @@ export function ProductForm({ initialData, onSubmit, isSubmitting = false }: Pro
                 <button
                   type="button"
                   onClick={() => setDescTab("preview")}
-                  className={`px-3 py-1 flex items-center gap-1 font-medium transition-colors ${
+                  className={`h-11 px-3 flex items-center gap-1 font-medium transition-colors ${
                     descTab === "preview"
                       ? "bg-brand text-white"
                       : "bg-surface text-ink hover:bg-canvas"
@@ -399,7 +399,7 @@ export function ProductForm({ initialData, onSubmit, isSubmitting = false }: Pro
               <button
                 type="button"
                 onClick={handleAddSpecRow}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-brand text-white text-xs font-semibold hover:bg-brand-hover"
+                className="inline-flex items-center gap-1 h-11 px-3 rounded-md bg-brand text-white text-xs font-semibold hover:bg-brand-hover"
               >
                 <Plus className="w-3 h-3" />
                 <span>Add Spec</span>
@@ -432,7 +432,7 @@ export function ProductForm({ initialData, onSubmit, isSubmitting = false }: Pro
                     <button
                       type="button"
                       onClick={() => handleRemoveSpecRow(i)}
-                      className="p-2 text-ink-subtle hover:text-danger rounded"
+                      className="w-11 h-11 inline-flex items-center justify-center text-ink-subtle hover:text-danger rounded"
                       title="Remove row"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

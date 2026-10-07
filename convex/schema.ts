@@ -284,10 +284,43 @@ export default defineSchema({
   // Transactional email dispatch log
   emailLogs: defineTable({
     to: v.string(),
+    subject: v.string(),
     template: v.string(),
-    status: v.union(v.literal("sent"), v.literal("failed")),
+    status: v.union(
+      v.literal("queued"),
+      v.literal("sent"),
+      v.literal("failed"),
+      v.literal("skipped_dry_run"),
+      v.literal("delivered"),
+      v.literal("bounced"),
+      v.literal("complained")
+    ),
+    provider: v.union(v.literal("resend"), v.literal("none")),
+    providerMessageId: v.optional(v.string()),
     error: v.optional(v.string()),
     orderId: v.optional(v.id("orders")),
+    html: v.optional(v.string()), // Stored only in dry-run mode
+    text: v.optional(v.string()), // Stored only in dry-run mode
+    attempts: v.number(),
     createdAt: v.number(),
-  }).index("by_created", ["createdAt"]),
+    updatedAt: v.number(),
+  })
+    .index("by_created", ["createdAt"])
+    .index("by_status", ["status", "createdAt"])
+    .index("by_provider_message_id", ["providerMessageId"])
+    .index("by_order", ["orderId", "createdAt"]),
+
+  // Email suppression list (bounced, complained, or manually blocked)
+  suppressedEmails: defineTable({
+    email: v.string(),
+    reason: v.string(),
+    createdAt: v.number(),
+  }).index("by_email", ["email"]),
+
+  // Rate limiting for auth and contact emails
+  emailRateLimits: defineTable({
+    recipient: v.string(),
+    count: v.number(),
+    windowStart: v.number(),
+  }).index("by_recipient", ["recipient"]),
 });

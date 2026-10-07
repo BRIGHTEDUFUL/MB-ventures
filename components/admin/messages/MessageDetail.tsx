@@ -9,6 +9,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { AdminHeader } from "@/components/admin/AdminHeader";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { FOCUS_RING } from "@/lib/focus";
 import {
   ArrowLeft,
   Clock,
@@ -20,9 +21,6 @@ import {
   Trash2,
   User,
 } from "lucide-react";
-
-const FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
 
 interface MessageDetailProps {
   messageId: Id<"contactMessages">;

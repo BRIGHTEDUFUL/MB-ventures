@@ -11,6 +11,7 @@ import {
   promoTileValidator,
   socialLinksValidator,
 } from "./lib/validators";
+import { logAudit } from "./auditLogs";
 
 /**
  * Get public store settings (branding, announcement bar, contact info, MoMo accounts, delivery zones, pickup locations).
@@ -265,7 +266,6 @@ function collectImageIds(
  * (announcement, hero, promoTiles, momoAccounts, socialLinks) are replaced
  * wholesale — the client must send the existing imageId back when unchanged.
  */
-// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
 export const update = mutation({
   args: {
     shopName: v.optional(v.string()),
@@ -291,7 +291,7 @@ export const update = mutation({
   },
   returns: v.object({ success: v.boolean() }),
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const { user } = await requireAdmin(ctx);
 
     const currency = args.currency?.trim();
     if (currency !== undefined && !ALLOWED_CURRENCIES.includes(currency)) {
@@ -337,6 +337,20 @@ export const update = mutation({
 
     const existing = await ctx.db.query("siteSettings").first();
     const base: SiteSettingsDoc = existing ?? DEFAULT_SETTINGS;
+
+    const changes: string[] = [];
+    if (args.shopName && args.shopName.trim() !== base.shopName) {
+      changes.push(`shop name: "${base.shopName}" → "${args.shopName.trim()}"`);
+    }
+    if (args.contactEmail && args.contactEmail.trim() !== base.contactEmail) {
+      changes.push(`contact email: "${base.contactEmail}" → "${args.contactEmail.trim()}"`);
+    }
+    if (args.cashOnDeliveryEnabled !== undefined && args.cashOnDeliveryEnabled !== base.cashOnDeliveryEnabled) {
+      changes.push(`cash on delivery: ${base.cashOnDeliveryEnabled} → ${args.cashOnDeliveryEnabled}`);
+    }
+    if (args.payInStoreEnabled !== undefined && args.payInStoreEnabled !== base.payInStoreEnabled) {
+      changes.push(`pay in store: ${base.payInStoreEnabled} → ${args.payInStoreEnabled}`);
+    }
 
     const nextDoc: SiteSettingsDoc = {
       shopName: args.shopName?.trim() ?? base.shopName,
@@ -395,6 +409,16 @@ export const update = mutation({
       } catch {
         // Best-effort cleanup — the blob may already be gone.
       }
+    }
+
+    if (changes.length > 0) {
+      await logAudit(ctx, {
+        userId: user._id,
+        action: "update",
+        resourceType: "settings",
+        resourceId: existing?._id || "singleton",
+        details: `Updated site settings: ${changes.join(", ")}`,
+      });
     }
 
     return { success: true };

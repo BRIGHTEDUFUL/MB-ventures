@@ -18,9 +18,7 @@ import {
   ShieldCheck,
   RotateCcw,
 } from "lucide-react";
-
-const FOCUS_RING =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
+import { FOCUS_RING } from "@/lib/focus";
 
 export default function CartPage() {
   const router = useRouter();

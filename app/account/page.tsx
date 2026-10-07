@@ -73,7 +73,10 @@ export default function AccountOverviewPage() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-heading font-semibold text-ink">Recent orders</h2>
-          <Link href="/account/orders" className="text-sm text-link hover:underline">
+          <Link
+            href="/account/orders"
+            className="inline-flex min-h-[44px] items-center text-sm text-link hover:underline"
+          >
             View all
           </Link>
         </div>
@@ -96,7 +99,7 @@ export default function AccountOverviewPage() {
             </p>
             <Link
               href="/catalog"
-              className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 bg-brand text-white text-sm font-medium rounded-md hover:bg-brand-hover transition-colors"
+              className="mt-4 inline-flex min-h-[44px] items-center gap-2 px-4 py-2.5 bg-brand text-white text-sm font-medium rounded-md hover:bg-brand-hover transition-colors"
             >
               Shop now
             </Link>

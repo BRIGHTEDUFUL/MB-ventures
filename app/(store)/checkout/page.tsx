@@ -742,7 +742,10 @@ export default function CheckoutPage() {
                   <h2 className="font-heading font-bold text-base text-ink">
                     Order Items ({itemCount})
                   </h2>
-                  <Link href="/cart" className="text-xs text-ink-muted hover:text-ink underline">
+                  <Link
+                    href="/cart"
+                    className="min-h-[44px] inline-flex items-center text-xs text-ink-muted hover:text-ink underline"
+                  >
                     Edit Cart
                   </Link>
                 </div>
