@@ -2,17 +2,18 @@
 
 ## Current status
 
-**Completed and pushed to `origin/main` on 2026-10-07.** The latest task (Step 9, the "Slate & Cobalt" UI redesign) is finished and verified.
+**Completed and pushed to `origin/main` on 2026-10-07.** The latest task (Step 10, delivery, pickup and site settings) is finished and verified. The sign-up blocker found while verifying it is fixed in its own commit (`fix(auth)`), separate from Step 10.
 
 | Check | Result |
 | --- | --- |
 | `npx tsc --noEmit` | 0 errors |
 | `npm run lint` | 0 warnings, 0 errors |
-| `npm run build` | passes — all 24 routes + middleware |
+| `npm run build` | passes — all 26 routes + middleware |
 | `npm test` | placeholder only (`Step 26 will configure tests`); no test files exist |
 | Lighthouse on `/` | accessibility 100, best-practices 100, SEO 100, 0 failures |
-| Horizontal overflow | none on `/`, `/catalog` or `/product/[slug]` at the tested viewport |
+| Horizontal overflow | none on `/`, `/catalog`, `/product/[slug]`, `/admin/delivery` or `/admin/settings` |
 | Banned lists in `docs/DESIGN.md` | 0 matches (visual and copy sweeps) |
+| Manual browser pass | sign-up → admin login, `/admin/delivery` create/reorder/delete, `/admin/settings` save/discard/validation + `beforeunload` guard |
 
 Known gaps carried forward (reported, not silently rewritten):
 
@@ -22,6 +23,10 @@ Known gaps carried forward (reported, not silently rewritten):
 - Seeded contact, WhatsApp, pickup and MoMo wallet numbers are placeholders (flagged in `docs/DECISIONS.md`).
 - `tailwindcss-animate` is used by `dialog`/`sheet` but is not on the allowed-extras list in `AGENTS.md`.
 - `tailwind.config.ts` extends the spacing scale to 8px units while much of the code was written against Tailwind's default 4px scale. Step 9 corrected the visible consequences (12-column grid gutters, control heights); icon classes such as `w-4 h-4` still render at 32px instead of 16px and need a design decision before being changed repo-wide.
+- **Sign-up was completely broken until Step 10** (now fixed — see the `fix(auth)` commit). Convex Auth's `Password` provider only inserted `{ email }`, so every registration failed schema validation on the required `role`/`createdAt`. Left-over from that: `users.createUser` is **dead code** — its doc comment claims Convex Auth calls it, but the library has no such hook (extra fields come from the provider's `profile`). It has been left untouched and should be removed in a later task.
+- Password rules are weaker than the build pack asks for: the pack wants "minimum 8 characters, at least one letter and one number", but the provider's default validation (and the sign-up form) only check length ≥ 8. Reported, not changed.
+- The "zones used by past orders are deactivated instead of deleted" rule in Step 10 was reviewed in code but **not exercised in the browser** — the dev deployment has no orders yet, so the branch could not be reached.
+- The `## Convex function inventory` below has not been maintained since Step 2 (it omits `categoriesAdmin`, `productsAdmin`, `files`, `addresses` and others). Step 10 appended only its own rows.
 
 ---
 
@@ -496,6 +501,37 @@ Known gaps carried forward (reported, not silently rewritten):
 
 ---
 
+### Step 10: Delivery, pickup and site settings
+
+- **Date**: 2026-10-07
+- **Status**: Completed.
+- **What was done**:
+  1. **Backend — delivery and pickup admin API** (`convex/fulfillment.ts`, +10 functions): `adminListDeliveryZones`, `adminListPickupLocations` (both return inactive rows too), and `create*` / `update*` / `remove*` / `toggle*Active` for each entity. All 12 admin functions call `requireAdmin(ctx)` first and declare `v.*` argument and return validators. `remove*` implements the pack's delete rule: if any `orders` row references `orders.deliveryZoneId` / `orders.pickupLocationId`, the row is **deactivated instead of deleted** and the mutation returns `{ deleted: false, deactivated: true }` so the UI can say so; otherwise it deletes and returns `{ deleted: true, deactivated: false }`. Validation: trimmed non-empty name/address/opening hours/estimated time, non-empty phone for pickup, integer `fee >= 0`, integer `sortOrder`. Every mutation carries the `// TODO(audit)` marker required until Step 25 lands.
+  2. **Backend — site settings admin API** (`convex/siteSettings.ts`, +2 functions): `getAdmin` returns the whole singleton (creating nothing) plus `heroImageUrl` and per-tile `imageUrl` resolved from storage; `update` takes **every field optional** so each settings tab saves independently, merges into the existing document (creating the singleton from defaults first if it is missing), and rejects bad input server-side — links must start with `/` or `https://`, social links must be `https://`, currency must be one of GHS/NGN/USD/GBP/EUR, phones must pass `lib/phone.ts`'s normaliser, `orderExpiryMinutes` must be 10–1440, `maxCartQuantity >= 1`, `lowStockThreshold >= 0`, `freeDeliveryThreshold > 0` or null. Object fields (`announcement`, `hero`, `promoTiles`, `socialLinks`, `momoAccounts`) replace wholesale, and any `_storage` id that disappears from `hero.imageId` or from the promo tiles is deleted from storage.
+  3. **`/admin/delivery`** — two tabs (Delivery zones, Pickup locations), each with a table (fee shown via `formatMoney`), create/edit dialog, active toggle, arrow-button sort controls that persist both swapped rows, and delete through `ConfirmDialog` that surfaces the "deactivated instead of deleted" result as an info toast. Empty, loading and mutation-error states all handled; row buttons carry full accessible names (`Edit delivery zone <name>`, `Move <name> up`).
+  4. **`/admin/settings`** — three tabs (Shop info, Homepage, Orders and stock), each with its **own Save button, own dirty flag and own discard**, a tab label that announces `(unsaved changes)`, a `beforeunload` guard while anything is dirty, and a live homepage-hero preview rendered from form state on the Homepage tab. Shop info includes currency select, social links and a repeatable MoMo-account editor (MTN/Telecel/AirtelTigo); money fields accept major units and send `toMinor()`.
+  5. **File-structure pass** — both new pages were far larger than anything else in the repo (1,679 and 917 lines vs. a previous maximum of 791), breaking the "small files" rule in `AGENTS.md`. They were split by pure code movement (verified by line-multiset diff, not rewrites) into `components/admin/settings/{model,fields,ShopInfoTab,HomepageTab,OrdersTab}` and `components/admin/delivery/{types,rowControls,DeliveryZonesTab,PickupLocationsTab}`. Largest file is now 471 lines.
+  6. **Sign-up blocker found and fixed (separate `fix(auth)` commit)** — verifying Step 10 needed an admin login, and registration had *never* worked: Convex Auth's `Password` provider writes only `{ email }`, so every sign-up failed schema validation on the required `role`/`createdAt`. The fix adds the provider's `profile` hook in `convex/auth.ts`, supplying `role: "customer"`, `createdAt`, the trimmed name and a lower-cased email (so the account id matches on later sign-ins). Sign-up now returns 200.
+- **Files added**:
+  - `app/admin/delivery/page.tsx`, `app/admin/settings/page.tsx`
+  - `components/admin/delivery/{types.ts,rowControls.tsx,DeliveryZonesTab.tsx,PickupLocationsTab.tsx}`
+  - `components/admin/settings/{model.ts,fields.tsx,ShopInfoTab.tsx,HomepageTab.tsx,OrdersTab.tsx}`
+- **Files changed**: `convex/fulfillment.ts`, `convex/siteSettings.ts`, `convex/auth.ts` (bug fix), `docs/PROGRESS.md`.
+- **New env vars**: None.
+- **New Convex functions**: 12 — 10 admin in `fulfillment`, 1 admin query + 1 admin mutation in `siteSettings` (appended to the inventory below).
+- **Verification**:
+  - `npx convex codegen` → 0 errors; `npx tsc --noEmit` → 0 errors; `npm run lint` → 0 warnings, 0 errors
+  - `npm run build` → passes, all 26 routes + middleware (dev server stopped first); `npm test` → placeholder, no test files
+  - Browser: sign-up → promoted with `users:makeAdmin` → `/admin/settings` all three tabs render, save persists across reload, discard reverts, invalid announcement link blocked by a server-side toast (`Announcement link must start with "/" or "https://".`), `beforeunload` dialog fires while dirty
+  - Browser: `/admin/delivery` → create zone (fee `12.50` → `GH₵12.50`), move it up (both rows' `sortOrder` persisted), delete it through the confirm dialog (row count 3 → 4 → 3); header "Add" button follows the active tab; both tabs and both create dialogs open correctly
+  - Zero console errors and zero horizontal overflow on `/`, `/admin/delivery` and `/admin/settings` at the tested viewport; homepage still renders after the change
+- **Known limitations / reported, not fixed**:
+  - The deactivate-instead-of-delete branch could not be reached in the browser (no orders exist in the dev deployment) — code-reviewed only.
+  - Hero and promo-tile image upload was not exercised end to end (no image chosen by the shop yet); the code path mirrors the existing `ImageUploader`.
+  - `users.createUser` is now confirmed dead code and should be removed; password rules are still length-only (both reported above).
+
+---
+
 ## Convex function inventory
 
 | Name | Type | Access | Purpose |
@@ -529,4 +565,16 @@ Known gaps carried forward (reported, not silently rewritten):
 | `adminOrders.updateStatus` | mutation | admin | Advance order status in state machine with stock adjustments |
 | `adminOrders.updateInternalNote` | mutation | admin | Save internal staff remarks on an order |
 | `adminOrders.getDashboardStats` | query | admin | Real-time overview metrics and MoMo verification queue |
+| `fulfillment.adminListDeliveryZones` | query | admin | List every delivery zone, including inactive ones |
+| `fulfillment.adminListPickupLocations` | query | admin | List every pickup location, including inactive ones |
+| `fulfillment.createDeliveryZone` | mutation | admin | Create a delivery zone after validating its fields |
+| `fulfillment.updateDeliveryZone` | mutation | admin | Update a delivery zone |
+| `fulfillment.removeDeliveryZone` | mutation | admin | Delete a zone, or deactivate it when orders reference it |
+| `fulfillment.toggleDeliveryZoneActive` | mutation | admin | Show or hide a zone on the storefront |
+| `fulfillment.createPickupLocation` | mutation | admin | Create a pickup location after validating its fields |
+| `fulfillment.updatePickupLocation` | mutation | admin | Update a pickup location |
+| `fulfillment.removePickupLocation` | mutation | admin | Delete a location, or deactivate it when orders reference it |
+| `fulfillment.togglePickupLocationActive` | mutation | admin | Show or hide a pickup location on the storefront |
+| `siteSettings.getAdmin` | query | admin | Full settings singleton with storage image URLs resolved |
+| `siteSettings.update` | mutation | admin | Partial, validated settings update; removes replaced images |
 

@@ -1,4 +1,47 @@
-import { query } from "./_generated/server";
+import { v } from "convex/values";
+import { mutation, query } from "./_generated/server";
+import { requireAdmin } from "./users";
+
+/** Shared argument validators for creating and updating a delivery zone. */
+const deliveryZoneArgs = {
+  name: v.string(),
+  fee: v.number(), // Pesewas, integer >= 0
+  estimatedDays: v.string(), // e.g. "1-2 business days"
+  isActive: v.boolean(),
+  sortOrder: v.number(),
+};
+
+/** Shared argument validators for creating and updating a pickup location. */
+const pickupLocationArgs = {
+  name: v.string(),
+  address: v.string(),
+  phone: v.string(),
+  openingHours: v.string(),
+  isActive: v.boolean(),
+  sortOrder: v.number(),
+};
+
+function requireNonEmpty(value: string, label: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) throw new Error(`${label} is required.`);
+  return trimmed;
+}
+
+function validateFee(fee: number): void {
+  if (!Number.isInteger(fee) || fee < 0) {
+    throw new Error("Delivery fee must be a whole number of pesewas and cannot be negative.");
+  }
+}
+
+function validateSortOrder(sortOrder: number): void {
+  if (!Number.isInteger(sortOrder)) {
+    throw new Error("Sort order must be a whole number.");
+  }
+}
+
+function bySortOrderThenName<T extends { sortOrder: number; name: string }>(a: T, b: T): number {
+  return a.sortOrder - b.sortOrder || a.name.localeCompare(b.name);
+}
 
 /**
  * Public query: List active delivery zones ordered by sortOrder.
@@ -27,5 +70,254 @@ export const listPickupLocations = query({
       .collect();
 
     return locations.sort((a, b) => a.sortOrder - b.sortOrder);
+  },
+});
+
+/**
+ * Admin Query: List every delivery zone (including inactive) for the admin table.
+ */
+export const adminListDeliveryZones = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("deliveryZones"),
+      _creationTime: v.number(),
+      name: v.string(),
+      fee: v.number(),
+      estimatedDays: v.string(),
+      isActive: v.boolean(),
+      sortOrder: v.number(),
+    })
+  ),
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+
+    const zones = await ctx.db.query("deliveryZones").collect();
+    return zones.sort(bySortOrderThenName);
+  },
+});
+
+/**
+ * Admin Query: List every pickup location (including inactive) for the admin table.
+ */
+export const adminListPickupLocations = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("pickupLocations"),
+      _creationTime: v.number(),
+      name: v.string(),
+      address: v.string(),
+      phone: v.string(),
+      openingHours: v.string(),
+      isActive: v.boolean(),
+      sortOrder: v.number(),
+    })
+  ),
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+
+    const locations = await ctx.db.query("pickupLocations").collect();
+    return locations.sort(bySortOrderThenName);
+  },
+});
+
+/**
+ * Admin Mutation: Create a delivery zone.
+ */
+// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
+export const createDeliveryZone = mutation({
+  args: deliveryZoneArgs,
+  returns: v.id("deliveryZones"),
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    const name = requireNonEmpty(args.name, "Zone name");
+    const estimatedDays = requireNonEmpty(args.estimatedDays, "Estimated delivery time");
+    validateFee(args.fee);
+    validateSortOrder(args.sortOrder);
+
+    return await ctx.db.insert("deliveryZones", {
+      name,
+      fee: args.fee,
+      estimatedDays,
+      isActive: args.isActive,
+      sortOrder: args.sortOrder,
+    });
+  },
+});
+
+/**
+ * Admin Mutation: Update a delivery zone.
+ */
+// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
+export const updateDeliveryZone = mutation({
+  args: { id: v.id("deliveryZones"), ...deliveryZoneArgs },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    const zone = await ctx.db.get(args.id);
+    if (!zone) throw new Error("Delivery zone not found.");
+
+    const name = requireNonEmpty(args.name, "Zone name");
+    const estimatedDays = requireNonEmpty(args.estimatedDays, "Estimated delivery time");
+    validateFee(args.fee);
+    validateSortOrder(args.sortOrder);
+
+    await ctx.db.patch(args.id, {
+      name,
+      fee: args.fee,
+      estimatedDays,
+      isActive: args.isActive,
+      sortOrder: args.sortOrder,
+    });
+  },
+});
+
+/**
+ * Admin Mutation: Delete a delivery zone, unless existing orders reference it —
+ * then deactivate it instead so historical orders keep their snapshot.
+ */
+// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
+export const removeDeliveryZone = mutation({
+  args: { id: v.id("deliveryZones") },
+  returns: v.object({ deleted: v.boolean(), deactivated: v.boolean() }),
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    const zone = await ctx.db.get(args.id);
+    if (!zone) throw new Error("Delivery zone not found.");
+
+    // orders.deliveryZoneId has no index, so the scan happens server-side.
+    const referencedOrder = await ctx.db
+      .query("orders")
+      .filter((q) => q.eq(q.field("deliveryZoneId"), args.id))
+      .first();
+
+    if (referencedOrder) {
+      await ctx.db.patch(args.id, { isActive: false });
+      return { deleted: false, deactivated: true };
+    }
+
+    await ctx.db.delete(args.id);
+    return { deleted: true, deactivated: false };
+  },
+});
+
+/**
+ * Admin Mutation: Activate or deactivate a delivery zone.
+ */
+// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
+export const toggleDeliveryZoneActive = mutation({
+  args: { id: v.id("deliveryZones"), isActive: v.boolean() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    const zone = await ctx.db.get(args.id);
+    if (!zone) throw new Error("Delivery zone not found.");
+
+    await ctx.db.patch(args.id, { isActive: args.isActive });
+  },
+});
+
+/**
+ * Admin Mutation: Create a pickup location.
+ */
+// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
+export const createPickupLocation = mutation({
+  args: pickupLocationArgs,
+  returns: v.id("pickupLocations"),
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    const name = requireNonEmpty(args.name, "Location name");
+    const address = requireNonEmpty(args.address, "Address");
+    const phone = requireNonEmpty(args.phone, "Phone number");
+    const openingHours = requireNonEmpty(args.openingHours, "Opening hours");
+    validateSortOrder(args.sortOrder);
+
+    return await ctx.db.insert("pickupLocations", {
+      name,
+      address,
+      phone,
+      openingHours,
+      isActive: args.isActive,
+      sortOrder: args.sortOrder,
+    });
+  },
+});
+
+/**
+ * Admin Mutation: Update a pickup location.
+ */
+// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
+export const updatePickupLocation = mutation({
+  args: { id: v.id("pickupLocations"), ...pickupLocationArgs },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    const location = await ctx.db.get(args.id);
+    if (!location) throw new Error("Pickup location not found.");
+
+    const name = requireNonEmpty(args.name, "Location name");
+    const address = requireNonEmpty(args.address, "Address");
+    const phone = requireNonEmpty(args.phone, "Phone number");
+    const openingHours = requireNonEmpty(args.openingHours, "Opening hours");
+    validateSortOrder(args.sortOrder);
+
+    await ctx.db.patch(args.id, {
+      name,
+      address,
+      phone,
+      openingHours,
+      isActive: args.isActive,
+      sortOrder: args.sortOrder,
+    });
+  },
+});
+
+/**
+ * Admin Mutation: Delete a pickup location, unless existing orders reference it —
+ * then deactivate it instead so historical orders keep their snapshot.
+ */
+// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
+export const removePickupLocation = mutation({
+  args: { id: v.id("pickupLocations") },
+  returns: v.object({ deleted: v.boolean(), deactivated: v.boolean() }),
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    const location = await ctx.db.get(args.id);
+    if (!location) throw new Error("Pickup location not found.");
+
+    // orders.pickupLocationId has no index, so the scan happens server-side.
+    const referencedOrder = await ctx.db
+      .query("orders")
+      .filter((q) => q.eq(q.field("pickupLocationId"), args.id))
+      .first();
+
+    if (referencedOrder) {
+      await ctx.db.patch(args.id, { isActive: false });
+      return { deleted: false, deactivated: true };
+    }
+
+    await ctx.db.delete(args.id);
+    return { deleted: true, deactivated: false };
+  },
+});
+
+/**
+ * Admin Mutation: Activate or deactivate a pickup location.
+ */
+// TODO(audit): write an auditLogs row here once Step 25 (logAudit) lands.
+export const togglePickupLocationActive = mutation({
+  args: { id: v.id("pickupLocations"), isActive: v.boolean() },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    const location = await ctx.db.get(args.id);
+    if (!location) throw new Error("Pickup location not found.");
+
+    await ctx.db.patch(args.id, { isActive: args.isActive });
   },
 });
