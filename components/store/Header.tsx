@@ -169,7 +169,7 @@ export function Header({
               </DropdownMenu>
             ) : (
               <Link
-                href="/auth/sign-in"
+                href="/sign-in"
                 aria-label="Sign In"
                 className="hidden sm:inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold rounded-md border border-line hover:border-line-strong hover:bg-canvas text-ink transition-colors min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
               >

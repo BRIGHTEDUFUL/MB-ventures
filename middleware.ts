@@ -17,7 +17,7 @@ const isProtectedRoute = createRouteMatcher([
 export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
   if (isProtectedRoute(request) && !(await convexAuth.isAuthenticated())) {
     // Redirect to sign-in, preserving the original destination
-    const signInUrl = new URL("/auth/sign-in", request.url);
+    const signInUrl = new URL("/sign-in", request.url);
     signInUrl.searchParams.set("redirect", request.nextUrl.pathname);
     return nextjsMiddlewareRedirect(request, signInUrl.toString());
   }

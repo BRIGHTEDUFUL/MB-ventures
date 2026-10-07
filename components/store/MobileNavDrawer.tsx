@@ -166,14 +166,14 @@ export function MobileNavDrawer({
             ) : (
               <div className="px-3 py-2 space-y-2">
                 <Link
-                  href="/auth/sign-in"
+                  href="/sign-in"
                   onClick={handleLinkClick}
                   className="w-full flex items-center justify-center h-11 px-4 rounded-md bg-ink text-surface text-sm font-semibold hover:bg-ink/90 transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
-                  href="/auth/sign-up"
+                  href="/sign-up"
                   onClick={handleLinkClick}
                   className="w-full flex items-center justify-center h-11 px-4 rounded-md border border-line-strong text-ink text-sm font-semibold hover:bg-canvas transition-colors"
                 >

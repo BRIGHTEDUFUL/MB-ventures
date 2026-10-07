@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
-export default function SignUpPage() {
+function SignUpForm() {
   const { signIn } = useAuthActions();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -48,7 +49,7 @@ export default function SignUpPage() {
       <p className="text-sm text-ink-muted mb-6">
         Already have an account?{" "}
         <Link
-          href={`/auth/sign-in${redirect !== "/account" ? `?redirect=${redirect}` : ""}`}
+          href={`/sign-in${redirect !== "/account" ? `?redirect=${encodeURIComponent(redirect)}` : ""}`}
           className="text-link underline underline-offset-2 hover:no-underline"
         >
           Sign in
@@ -118,9 +119,10 @@ export default function SignUpPage() {
         <button
           type="submit"
           disabled={loading || !name || !email || !password}
-          className="w-full h-11 rounded-md bg-ink text-white font-medium text-sm transition-opacity hover:opacity-90 active:opacity-75 disabled:opacity-40 disabled:cursor-not-allowed mt-2"
+          className="w-full h-11 rounded-md bg-ink text-white font-medium text-sm transition-opacity hover:opacity-90 active:opacity-75 disabled:opacity-40 disabled:cursor-not-allowed mt-2 flex items-center justify-center gap-2"
         >
-          {loading ? "Creating account…" : "Create account"}
+          {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+          <span>{loading ? "Creating account…" : "Create account"}</span>
         </button>
       </form>
 
@@ -136,5 +138,19 @@ export default function SignUpPage() {
         .
       </p>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="bg-surface border border-line rounded-lg p-8 text-center text-sm text-ink-muted">
+          Loading sign-up...
+        </div>
+      }
+    >
+      <SignUpForm />
+    </Suspense>
   );
 }
