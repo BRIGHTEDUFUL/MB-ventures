@@ -4,25 +4,41 @@
 
 @layer base {
   :root {
-    /* Design tokens from docs/DESIGN.md */
-    --ink: #14181F;
-    --ink-muted: #5B6470;
-    --ink-subtle: #8A929C;
+    /* Design tokens from docs/DESIGN.md — "Slate & Cobalt"
+       Structure: blue-tinted slate. Interaction: brand cobalt. Offers: brand orange. */
+    --ink: #0F172A;
+    --ink-muted: #475569;
+    --ink-subtle: #596575;
     --surface: #FFFFFF;
-    --canvas: #F4F5F6;
-    --canvas-strong: #E9EBED;
-    --line: #E3E5E8;
-    --line-strong: #CDD1D6;
-    --accent: #D9480F;
-    --accent-soft: #FDEEE6;
-    --link: #0A5CC2;
-    --focus: #0A5CC2;
-    --success: #1B7F4B;
-    --success-soft: #E8F5EE;
-    --warning: #A15C00;
+    --canvas: #F1F5F9;
+    --canvas-strong: #E2E8F0;
+    --line: #E2E8F0;
+    --line-strong: #7F8C9E;
+
+    /* Brand — primary interactive colour (buttons, links, active nav, focus) */
+    --brand: #2563EB;
+    --brand-hover: #1D4ED8;
+    --brand-active: #1E40AF;
+    --brand-soft: #EAF1FE;
+
+    /* Accent — offers, sale prices, discount badges only */
+    --accent: #C2410C;
+    --accent-hover: #9A3412;
+    --accent-soft: #FFF1E6;
+
+    --link: #1D4ED8;
+    --focus: #1D4ED8;
+    --success: #0E7C46;
+    --success-soft: #E7F6EE;
+    --warning: #B45309;
     --warning-soft: #FEF3E2;
-    --danger: #C62828;
-    --danger-soft: #FDEAEA;
+    --danger: #CE2222;
+    --danger-hover: #B91C1C;
+    --danger-soft: #FEECEC;
+
+    /* Elevation — floating layers only (drawer, dialog, popover, dropdown, toast) */
+    --shadow-layer: 0 8px 24px rgba(15, 23, 42, 0.12);
+    --shadow-layer-sm: 0 2px 8px rgba(15, 23, 42, 0.08);
 
     /* Radii tokens (4, 6, 8 only) */
     --radius-sm: 4px;
@@ -137,7 +153,7 @@
 
   /* Selection highlight */
   ::selection {
-    background-color: var(--accent-soft);
+    background-color: var(--brand-soft);
     color: var(--ink);
   }
 

@@ -5,15 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
 import { useAuthActions } from "@convex-dev/auth/react";
-import {
-  Search,
-  ShoppingBag,
-  User,
-  Menu,
-  ShieldCheck,
-  LogOut,
-  ChevronDown,
-} from "lucide-react";
+import { Search, ShoppingBag, User, Menu, ShieldCheck, LogOut, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { QuickSearchDialog } from "./QuickSearchDialog";
 import { MobileNavDrawer } from "./MobileNavDrawer";
+import { CartDrawer } from "./CartDrawer";
+import { useCart } from "@/lib/cart/CartContext";
 
 interface HeaderProps {
   categories: Array<{
@@ -37,16 +31,11 @@ interface HeaderProps {
   cartCount?: number;
 }
 
-export function Header({
-  categories,
-  shopName,
-  supportPhone,
-  whatsappNumber,
-  cartCount = 0,
-}: HeaderProps) {
+export function Header({ categories, shopName, supportPhone, whatsappNumber }: HeaderProps) {
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading } = useCurrentUser();
   const { signOut } = useAuthActions();
+  const { itemCount, openDrawer } = useCart();
 
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -113,15 +102,14 @@ export function Header({
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              aria-label="Search catalog"
-              className="flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-line hover:border-line-strong bg-canvas hover:bg-canvas-strong text-ink-muted text-xs font-normal transition-colors min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-line hover:border-line-strong bg-canvas hover:bg-canvas-strong text-ink-muted text-xs font-normal transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
-              <Search className="w-4 h-4 text-ink-muted shrink-0" />
-              <span className="hidden sm:inline-block pr-1 text-ink-muted">Search products...</span>
-              <kbd className="hidden md:inline-block font-mono text-[10px] bg-surface text-ink-subtle border border-line px-1.5 py-0.5 rounded">
-                ⌘K
-              </kbd>
+              <Search className="w-4 h-4 text-ink-muted shrink-0" aria-hidden="true" />
+              <span className="sr-only sm:not-sr-only pr-1 text-ink-muted">Search products...</span>
             </button>
+            <kbd className="hidden md:inline-block font-mono text-[10px] bg-surface text-ink-subtle border border-line px-1.5 py-0.5 rounded pointer-events-none select-none">
+              ⌘K
+            </kbd>
 
             {/* User Account Menu / Sign In */}
             {!isLoading && isAuthenticated && user ? (
@@ -130,17 +118,27 @@ export function Header({
                   <button
                     type="button"
                     aria-label="User account menu"
-                    className="flex items-center gap-1.5 p-1.5 rounded-md hover:bg-canvas text-ink transition-colors min-w-[40px] min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                    className="flex items-center gap-1.5 p-1.5 rounded-md hover:bg-canvas text-ink transition-colors min-w-[44px] min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                   >
                     <div className="w-7 h-7 rounded-full bg-canvas-strong border border-line flex items-center justify-center text-xs font-semibold text-ink">
-                      {user.name ? user.name.slice(0, 2).toUpperCase() : <User className="w-3.5 h-3.5" />}
+                      {user.name ? (
+                        user.name.slice(0, 2).toUpperCase()
+                      ) : (
+                        <User className="w-3.5 h-3.5" />
+                      )}
                     </div>
                     <ChevronDown className="w-3.5 h-3.5 text-ink-muted hidden sm:block" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52 bg-surface border-line shadow-lg">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-52 bg-surface border-line shadow-layer"
+                >
                   <DropdownMenuLabel className="font-normal text-xs text-ink-muted">
-                    Signed in as <strong className="text-ink font-medium block truncate">{user.email || user.name}</strong>
+                    Signed in as{" "}
+                    <strong className="text-ink font-medium block truncate">
+                      {user.email || user.name}
+                    </strong>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-line" />
                   <DropdownMenuItem asChild>
@@ -171,25 +169,26 @@ export function Header({
               <Link
                 href="/sign-in"
                 aria-label="Sign In"
-                className="hidden sm:inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold rounded-md border border-line hover:border-line-strong hover:bg-canvas text-ink transition-colors min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                className="hidden sm:inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold rounded-md border border-line hover:border-line-strong hover:bg-canvas text-ink transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
               >
                 Sign In
               </Link>
             )}
 
             {/* Shopping Cart Button */}
-            <Link
-              href="/cart"
-              aria-label={`Shopping cart with ${cartCount} items`}
+            <button
+              type="button"
+              onClick={openDrawer}
+              aria-label={`Shopping cart with ${itemCount} items`}
               className="relative p-2 rounded-md hover:bg-canvas text-ink transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
               <ShoppingBag className="w-5 h-5 text-ink" />
-              {cartCount > 0 && (
-                <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-ink text-surface text-[10px] font-mono font-bold rounded-full flex items-center justify-center">
-                  {cartCount}
+              {itemCount > 0 && (
+                <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-brand text-white text-[10px] font-mono font-bold rounded-full flex items-center justify-center">
+                  {itemCount}
                 </span>
               )}
-            </Link>
+            </button>
           </div>
         </div>
       </header>
@@ -205,6 +204,9 @@ export function Header({
         supportPhone={supportPhone}
         whatsappNumber={whatsappNumber}
       />
+
+      {/* Slide-out Cart Drawer */}
+      <CartDrawer />
     </>
   );
 }

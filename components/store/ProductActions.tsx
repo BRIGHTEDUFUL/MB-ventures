@@ -2,25 +2,37 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCart } from "@/lib/cart/CartContext";
 import { ShoppingBag, Check, Minus, Plus, MessageSquare, ArrowRight } from "lucide-react";
-import { toast } from "sonner";
 
 interface ProductActionsProps {
+  productId?: string;
   name: string;
+  slug?: string;
+  brand?: string;
   sku?: string;
+  price?: number;
+  salePrice?: number;
+  primaryImageUrl?: string | null;
   availableStock: number;
   whatsappNumber?: string;
 }
 
 export function ProductActions({
+  productId = "",
   name,
+  slug = "",
+  brand,
   sku,
+  price = 0,
+  salePrice,
+  primaryImageUrl,
   availableStock,
   whatsappNumber = "+233240000000",
 }: ProductActionsProps) {
   const router = useRouter();
+  const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
-  const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
 
   const isOutOfStock = availableStock <= 0;
@@ -37,23 +49,44 @@ export function ProductActions({
   const handleAddToCart = () => {
     if (isOutOfStock) return;
 
-    setIsAdding(true);
-    // Add to cart simulation / local storage
-    setTimeout(() => {
-      setIsAdding(false);
-      setIsAdded(true);
-      toast.success(`Added ${quantity} × "${name}" to cart`);
+    addItem(
+      {
+        _id: productId,
+        name,
+        slug,
+        brand,
+        sku,
+        price,
+        salePrice,
+        primaryImageUrl,
+        availableStock,
+      },
+      quantity
+    );
 
-      setTimeout(() => {
-        setIsAdded(false);
-      }, 2000);
-    }, 250);
+    setIsAdded(true);
+    setTimeout(() => {
+      setIsAdded(false);
+    }, 1800);
   };
 
   const handleBuyNow = () => {
     if (isOutOfStock) return;
-    toast.success(`Proceeding to checkout with ${quantity} × "${name}"`);
-    router.push("/cart");
+    addItem(
+      {
+        _id: productId,
+        name,
+        slug,
+        brand,
+        sku,
+        price,
+        salePrice,
+        primaryImageUrl,
+        availableStock,
+      },
+      quantity
+    );
+    router.push("/checkout");
   };
 
   const whatsappMessage = encodeURIComponent(
@@ -65,13 +98,13 @@ export function ProductActions({
       {/* Quantity & Add to Cart Controls */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         {/* Quantity Stepper */}
-        <div className="flex items-center justify-between border border-line-strong rounded-md h-12 px-2 bg-surface min-w-[130px] shrink-0">
+        <div className="flex items-center justify-between border border-line-strong rounded-md h-11 px-2 bg-surface min-w-[130px] shrink-0">
           <button
             type="button"
             onClick={handleDecrement}
             disabled={quantity <= 1 || isOutOfStock}
             aria-label="Decrease quantity"
-            className="w-8 h-8 flex items-center justify-center text-ink hover:text-ink-muted disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus rounded"
+            className="w-11 h-11 flex items-center justify-center text-ink hover:text-ink-muted disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus rounded"
           >
             <Minus className="w-4 h-4" />
           </button>
@@ -83,7 +116,7 @@ export function ProductActions({
             onClick={handleIncrement}
             disabled={quantity >= maxAllowed || isOutOfStock}
             aria-label="Increase quantity"
-            className="w-8 h-8 flex items-center justify-center text-ink hover:text-ink-muted disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus rounded"
+            className="w-11 h-11 flex items-center justify-center text-ink hover:text-ink-muted disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus rounded"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -93,13 +126,13 @@ export function ProductActions({
         <button
           type="button"
           onClick={handleAddToCart}
-          disabled={isOutOfStock || isAdding}
-          className={`flex-1 h-12 px-6 rounded-md font-semibold text-sm flex items-center justify-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ${
+          disabled={isOutOfStock}
+          className={`flex-1 h-[52px] px-6 rounded-md font-semibold text-sm flex items-center justify-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ${
             isOutOfStock
               ? "bg-canvas-strong text-ink-subtle cursor-not-allowed border border-line"
               : isAdded
-              ? "bg-success text-surface"
-              : "bg-ink text-surface hover:bg-ink/90 active:bg-black"
+                ? "bg-success text-surface"
+                : "bg-brand text-white hover:bg-brand-hover active:bg-brand-active"
           }`}
         >
           {isAdded ? (

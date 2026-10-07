@@ -4,9 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { Price } from "@/components/shared/Price";
 import { Badge } from "@/components/ui/badge";
-import { Package, ShoppingBag, Check } from "lucide-react";
+import { Package } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { useCart } from "@/lib/cart/CartContext";
 
 export interface ProductCardProps {
   product: {
@@ -27,6 +27,7 @@ export interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { addItem } = useCart();
   const [isAdded, setIsAdded] = useState(false);
 
   const isOutOfStock = product.availableStock <= 0;
@@ -38,9 +39,19 @@ export function ProductCard({ product }: ProductCardProps) {
 
     if (isOutOfStock) return;
 
-    setIsAdded(true);
-    toast.success(`Added "${product.name}" to cart`);
+    addItem({
+      _id: product._id,
+      name: product.name,
+      slug: product.slug,
+      brand: product.brand,
+      sku: product.sku,
+      price: product.price,
+      salePrice: product.salePrice,
+      primaryImageUrl: product.primaryImageUrl,
+      availableStock: product.availableStock,
+    });
 
+    setIsAdded(true);
     setTimeout(() => {
       setIsAdded(false);
     }, 1500);
@@ -99,9 +110,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Title */}
         <h3 className="font-heading font-semibold text-sm sm:text-base text-ink line-clamp-2 mb-2 group-hover:text-link transition-colors">
-          <Link href={`/product/${product.slug}`}>
-            {product.name}
-          </Link>
+          <Link href={`/product/${product.slug}`}>{product.name}</Link>
         </h3>
 
         {/* Specs highlight snippet */}
@@ -113,8 +122,8 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Price & Add to Cart button */}
         <div className="mt-auto pt-3 border-t border-line flex items-center justify-between gap-2">
-          <div>
-            <div className="flex items-baseline gap-2">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
               <Price
                 amount={product.effectivePrice}
                 dropZeroCents
@@ -138,25 +147,15 @@ export function ProductCard({ product }: ProductCardProps) {
             disabled={isOutOfStock}
             onClick={handleQuickAdd}
             aria-label={`Add ${product.name} to cart`}
-            className={`min-h-[38px] px-3 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ${
+            className={`shrink-0 min-h-[44px] px-2 rounded-md text-xs font-semibold flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ${
               isOutOfStock
                 ? "bg-canvas-strong text-ink-subtle cursor-not-allowed"
                 : isAdded
-                ? "bg-success text-surface"
-                : "bg-ink text-surface hover:bg-ink/90 active:bg-black"
+                  ? "bg-success text-surface"
+                  : "bg-brand text-white hover:bg-brand-hover active:bg-brand-active"
             }`}
           >
-            {isAdded ? (
-              <>
-                <Check className="w-3.5 h-3.5" />
-                <span>Added</span>
-              </>
-            ) : (
-              <>
-                <ShoppingBag className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Add</span>
-              </>
-            )}
+            <span>{isAdded ? "Added" : "Add"}</span>
           </button>
         </div>
       </div>

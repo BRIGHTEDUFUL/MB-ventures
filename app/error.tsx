@@ -25,7 +25,7 @@ export default function GlobalError({
           </p>
           <button
             onClick={reset}
-            className="inline-flex items-center justify-center h-10 px-5 rounded-md bg-ink text-white font-medium text-sm transition-opacity hover:opacity-90 active:opacity-75"
+            className="inline-flex items-center justify-center h-11 px-5 rounded-md bg-brand text-white font-medium text-sm transition-opacity hover:opacity-90 active:opacity-75"
           >
             Try again
           </button>

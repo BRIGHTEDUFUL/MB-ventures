@@ -43,9 +43,7 @@ function SignUpForm() {
   return (
     <div className="bg-surface border border-line rounded-lg p-6 sm:p-8">
       {/* Heading */}
-      <h1 className="font-heading font-bold text-ink text-xl mb-1">
-        Create account
-      </h1>
+      <h1 className="font-heading font-bold text-ink text-xl mb-1">Create account</h1>
       <p className="text-sm text-ink-muted mb-6">
         Already have an account?{" "}
         <Link
@@ -58,10 +56,7 @@ function SignUpForm() {
 
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <div>
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium text-ink mb-1.5"
-          >
+          <label htmlFor="name" className="block text-sm font-medium text-ink mb-1.5">
             Full name
           </label>
           <input
@@ -77,10 +72,7 @@ function SignUpForm() {
         </div>
 
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-ink mb-1.5"
-          >
+          <label htmlFor="email" className="block text-sm font-medium text-ink mb-1.5">
             Email address
           </label>
           <input
@@ -96,10 +88,7 @@ function SignUpForm() {
         </div>
 
         <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-ink mb-1.5"
-          >
+          <label htmlFor="password" className="block text-sm font-medium text-ink mb-1.5">
             Password
             <span className="text-ink-subtle font-normal ml-1">(min. 8 characters)</span>
           </label>
@@ -119,7 +108,7 @@ function SignUpForm() {
         <button
           type="submit"
           disabled={loading || !name || !email || !password}
-          className="w-full h-11 rounded-md bg-ink text-white font-medium text-sm transition-opacity hover:opacity-90 active:opacity-75 disabled:opacity-40 disabled:cursor-not-allowed mt-2 flex items-center justify-center gap-2"
+          className="w-full h-11 rounded-md bg-brand text-white font-medium text-sm transition-opacity hover:opacity-90 active:opacity-75 disabled:opacity-40 disabled:cursor-not-allowed mt-2 flex items-center justify-center gap-2"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
           <span>{loading ? "Creating account…" : "Create account"}</span>

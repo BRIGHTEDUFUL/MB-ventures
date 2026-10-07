@@ -2,12 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
 import { useAuthActions } from "@convex-dev/auth/react";
 import {
@@ -111,9 +106,7 @@ export function MobileNavDrawer({
                   href={`/category/${cat.slug}`}
                   onClick={handleLinkClick}
                   className={`flex items-center justify-between px-3 py-3 rounded-md text-sm transition-colors min-h-[44px] ${
-                    isActive
-                      ? "bg-canvas font-semibold text-ink"
-                      : "text-ink hover:bg-canvas"
+                    isActive ? "bg-canvas font-semibold text-ink" : "text-ink hover:bg-canvas"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -168,7 +161,7 @@ export function MobileNavDrawer({
                 <Link
                   href="/sign-in"
                   onClick={handleLinkClick}
-                  className="w-full flex items-center justify-center h-11 px-4 rounded-md bg-ink text-surface text-sm font-semibold hover:bg-ink/90 transition-colors"
+                  className="w-full flex items-center justify-center h-11 px-4 rounded-md bg-brand text-white text-sm font-semibold hover:bg-brand-hover transition-colors"
                 >
                   Sign In
                 </Link>

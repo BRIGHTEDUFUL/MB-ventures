@@ -6,12 +6,7 @@ import Image from "next/image";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Search, Loader2, ArrowRight, Package } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Price } from "@/components/shared/Price";
 import { Badge } from "@/components/ui/badge";
 
@@ -20,10 +15,7 @@ interface QuickSearchDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function QuickSearchDialog({
-  open,
-  onOpenChange,
-}: QuickSearchDialogProps) {
+export function QuickSearchDialog({ open, onOpenChange }: QuickSearchDialogProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -42,9 +34,7 @@ export function QuickSearchDialog({
   // Query Convex full-text search
   const results = useQuery(
     api.products.search,
-    debouncedQuery.length >= 2
-      ? { query: debouncedQuery, limit: 6 }
-      : "skip"
+    debouncedQuery.length >= 2 ? { query: debouncedQuery, limit: 6 } : "skip"
   );
 
   const isSearching = debouncedQuery.length >= 2 && results === undefined;
@@ -63,7 +53,7 @@ export function QuickSearchDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-0 max-w-xl overflow-hidden rounded-lg bg-surface border-line shadow-2xl">
+      <DialogContent className="p-0 max-w-xl overflow-hidden rounded-lg bg-surface border-line shadow-layer">
         <DialogHeader className="sr-only">
           <DialogTitle>Search Products</DialogTitle>
         </DialogHeader>
@@ -84,9 +74,7 @@ export function QuickSearchDialog({
             className="flex-1 bg-transparent text-ink placeholder:text-ink-muted text-sm font-normal focus:outline-none"
             autoFocus
           />
-          {isSearching && (
-            <Loader2 className="w-4 h-4 text-ink-muted animate-spin shrink-0" />
-          )}
+          {isSearching && <Loader2 className="w-4 h-4 text-ink-muted animate-spin shrink-0" />}
           <span className="text-[11px] font-mono text-ink-subtle border border-line rounded px-1.5 py-0.5 select-none hidden sm:inline-block">
             ESC
           </span>
@@ -104,7 +92,8 @@ export function QuickSearchDialog({
             <div className="px-4 py-8 text-center">
               <p className="text-sm font-medium text-ink">No matching products found</p>
               <p className="text-xs text-ink-muted mt-1">
-                Try searching for &ldquo;chair&rdquo;, &ldquo;desk&rdquo;, &ldquo;keyboard&rdquo;, or &ldquo;SSD&rdquo;.
+                Try searching for &ldquo;chair&rdquo;, &ldquo;desk&rdquo;, &ldquo;keyboard&rdquo;,
+                or &ldquo;SSD&rdquo;.
               </p>
             </div>
           )}
@@ -141,16 +130,18 @@ export function QuickSearchDialog({
                         <span className="text-xs text-ink-muted">{product.brand}</span>
                       )}
                       {product.sku && (
-                        <span className="text-[11px] font-mono text-ink-subtle">
-                          {product.sku}
-                        </span>
+                        <span className="text-[11px] font-mono text-ink-subtle">{product.sku}</span>
                       )}
                     </div>
                   </div>
                 </div>
 
                 <div className="text-right shrink-0 flex flex-col items-end">
-                  <Price amount={product.effectivePrice} dropZeroCents className="text-sm font-semibold" />
+                  <Price
+                    amount={product.effectivePrice}
+                    dropZeroCents
+                    className="text-sm font-semibold"
+                  />
                   {product.isOnSale && (
                     <Badge variant="sale" className="mt-0.5">
                       Sale

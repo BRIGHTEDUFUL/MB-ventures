@@ -30,8 +30,15 @@ export default {
           DEFAULT: "var(--line)",
           strong: "var(--line-strong)",
         },
+        brand: {
+          DEFAULT: "var(--brand)",
+          hover: "var(--brand-hover)",
+          active: "var(--brand-active)",
+          soft: "var(--brand-soft)",
+        },
         accent: {
           DEFAULT: "var(--accent)",
+          hover: "var(--accent-hover)",
           soft: "var(--accent-soft)",
         },
         link: "var(--link)",
@@ -46,6 +53,7 @@ export default {
         },
         danger: {
           DEFAULT: "var(--danger)",
+          hover: "var(--danger-hover)",
           soft: "var(--danger-soft)",
         },
 
@@ -61,8 +69,8 @@ export default {
           foreground: "var(--ink)",
         },
         primary: {
-          DEFAULT: "var(--ink)",
-          foreground: "#FFFFFF",
+          DEFAULT: "var(--brand)",
+          foreground: "var(--surface)",
         },
         secondary: {
           DEFAULT: "var(--canvas)",
@@ -74,7 +82,7 @@ export default {
         },
         destructive: {
           DEFAULT: "var(--danger)",
-          foreground: "#FFFFFF",
+          foreground: "var(--surface)",
         },
         border: "var(--line)",
         input: "var(--line-strong)",
@@ -88,11 +96,11 @@ export default {
       },
       screens: {
         // Mobile-first breakpoints matching docs/DESIGN.md
-        xs: "375px",   // small phones
-        sm: "640px",   // tablet portrait
-        md: "768px",   // tablet landscape
-        lg: "1024px",  // desktop
-        xl: "1280px",  // max container
+        xs: "375px", // small phones
+        sm: "640px", // tablet portrait
+        md: "768px", // tablet landscape
+        lg: "1024px", // desktop
+        xl: "1280px", // max container
         "2xl": "1536px",
       },
       spacing: {
@@ -112,6 +120,20 @@ export default {
         "9": "72px",
         "10": "80px",
         "12": "96px",
+      },
+      boxShadow: {
+        // Floating layers only — cards and panels stay flat at rest
+        layer: "var(--shadow-layer)",
+        "layer-sm": "var(--shadow-layer-sm)",
+      },
+      transitionDuration: {
+        120: "120ms", // hover, press
+        200: "200ms", // UI state changes
+        320: "320ms", // drawers, dialogs
+      },
+      transitionTimingFunction: {
+        // docs/DESIGN.md easing
+        snap: "cubic-bezier(0.2, 0, 1)",
       },
     },
   },

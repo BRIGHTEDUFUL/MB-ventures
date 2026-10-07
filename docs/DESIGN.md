@@ -4,18 +4,28 @@
 A confident, plain-spoken technology and office retailer. Reference feeling: a well-run specialist store, not a startup landing page. Products and facts lead; decoration follows only when it helps. Light theme only at launch.
 
 ## Color tokens (single source of truth: app/globals.css CSS variables, mapped into Tailwind theme)
-- ink: #14181F (text, primary buttons)
-- ink-muted: #5B6470
-- ink-subtle: #8A929C
+Direction: **Slate & Cobalt**. Structure is blue-tinted slate, interaction is brand cobalt, offers are brand orange.
+
+Neutrals
+- ink: #0F172A (text, dark buttons, logo mark)
+- ink-muted: #475569
+- ink-subtle: #596575
 - surface: #FFFFFF
-- canvas: #F4F5F6 (product photo background, alternate sections)
-- canvas-strong: #E9EBED
-- line: #E3E5E8 (hairline borders), line-strong: #CDD1D6
-- accent: #D9480F (offers, sale price, discount badges only)
-- accent-soft: #FDEEE6
-- link / focus: #0A5CC2
-- success: #1B7F4B, warning: #A15C00, danger: #C62828 (each with a -soft background tint)
-Rules: the accent appears on sale prices, discount badges, and at most one promotional element per screen. No gradients anywhere except a plain solid-color scrim over photos when text sits on an image. No pure black or pure white text on tinted backgrounds. Brand color changes happen by editing the token values only.
+- canvas: #F1F5F9 (product photo background, alternate sections)
+- canvas-strong: #E2E8F0
+- line: #E2E8F0 (hairline dividers), line-strong: #7F8C9E (control and input borders, hover outline — 3.4:1 on surface, 3.1:1 on canvas, so every control boundary meets WCAG 1.4.11)
+
+Brand (primary interactive colour: buttons, links, active nav, focus rings, selected states, count badges)
+- brand: #2563EB, brand-hover: #1D4ED8, brand-active: #1E40AF, brand-soft: #EAF1FE
+- link / focus: #1D4ED8
+
+Accent (offers, sale price, discount badges only — never on primary navigation or standard CTAs)
+- accent: #C2410C, accent-hover: #9A3412, accent-soft: #FFF1E6
+
+Status
+- success: #0E7C46, warning: #B45309, danger: #CE2222 / danger-hover: #B91C1C (each with a -soft background tint)
+
+Rules: every text token has at least 4.5:1 against surface and canvas; control borders have at least 3:1. Verify with a contrast checker whenever a token value changes. The accent appears on sale prices, discount badges, and at most one promotional element per screen. Brand cobalt carries interaction; it is not decorative, so never use it as a large background wash. No gradients anywhere except a plain solid-color scrim over photos when text sits on an image. No pure black or pure white text on tinted backgrounds. Brand color changes happen by editing the token values only.
 
 ## Typography
 - Headings: Archivo (variable, via next/font), weights 600 and 700, letter-spacing -0.02em on display sizes, line-height 1.05 to 1.15.
@@ -33,7 +43,7 @@ Rules: the accent appears on sale prices, discount badges, and at most one promo
 
 ## Shape and depth
 - Radius: 4px (images, badges), 6px (buttons, inputs), 8px (cards, panels, dialogs). Nothing larger. No pill buttons (tiny count dots excepted).
-- Borders: 1px solid line. Shadows only on floating layers (popover, dropdown, drawer, dialog): 0 8px 24px rgba(20,24,31,0.12). No shadows on cards at rest.
+- Borders: 1px solid line. Shadows only on floating layers (popover, dropdown, drawer, dialog, toast): Tailwind `shadow-layer` = 0 8px 24px rgba(15, 23, 42, 0.12); small overlays (tooltip, menu item) use `shadow-layer-sm`. No shadows on cards or panels at rest.
 - Photo panels use the canvas color behind products. Images use object-fit contain for products, cover for lifestyle.
 
 ## Motion
@@ -43,7 +53,7 @@ Rules: the accent appears on sale prices, discount badges, and at most one promo
 - Respect prefers-reduced-motion: reduce to opacity-only changes or none.
 
 ## Components (rules)
-- Buttons: primary = ink background, white text, 6px radius, 44px min height (52px large); secondary = 1px line-strong border, ink text; tertiary = text link with a small arrow icon; accent button only for a single offer CTA per page. States: hover (slightly lighter ink), active (pressed, 1px translate down is NOT allowed; use darker ink), focus (2px link-colored ring with 2px offset), disabled (muted, with an explanation nearby), loading (label replaced by short progress text, width unchanged).
+- Buttons: primary = brand background (`bg-brand`, hover `brand-hover`, active `brand-active`), white text, 6px radius, 44px min height (52px large); secondary = 1px line-strong border on surface, ink text; dark = ink background for high-contrast emphasis (logo, footer CTA); tertiary = text link with a small arrow icon; accent button only for a single offer CTA per page. States: hover (next token in the ramp, never a raw hex), active (pressed — 1px translate down is NOT allowed; use the darker token), focus (2px focus ring with 2px offset on surface), disabled (muted, with an explanation nearby), loading (label replaced by short progress text, width unchanged).
 - Inputs: 44px height, 6px radius, 1px line-strong border, visible labels above fields (never placeholder-only), helper text below, errors in danger color with text (not color alone).
 - Cards (product): no shadow, no border at rest on listing grids (the canvas photo panel is the card), 1px border on hover.
 - Badges: 4px radius, small, one badge per product card maximum (priority: Sale, Low stock, New). Never decorative.

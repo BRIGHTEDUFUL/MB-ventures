@@ -71,6 +71,57 @@ export const updateProfile = mutation({
 });
 
 /**
+ * Internal mutation to promote a user to admin by email.
+ * Callable from Convex dashboard or dev scripts.
+ */
+export const makeAdmin = internalMutation({
+  args: {
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email.trim().toLowerCase()))
+      .first();
+
+    if (!user) {
+      throw new Error(`User with email "${args.email}" not found.`);
+    }
+
+    await ctx.db.patch(user._id, {
+      role: "admin",
+    });
+
+    return { success: true, userId: user._id };
+  },
+});
+
+/**
+ * Internal mutation to demote an admin user to customer role.
+ */
+export const makeCustomer = internalMutation({
+  args: {
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email.trim().toLowerCase()))
+      .first();
+
+    if (!user) {
+      throw new Error(`User with email "${args.email}" not found.`);
+    }
+
+    await ctx.db.patch(user._id, {
+      role: "customer",
+    });
+
+    return { success: true, userId: user._id };
+  },
+});
+
+/**
  * Require an authenticated user — throws if not signed in.
  * Import and call from other Convex functions (not a callable function itself).
  */
@@ -87,6 +138,7 @@ export async function requireUser(ctx: QueryCtx | MutationCtx) {
  */
 export async function requireAdmin(ctx: QueryCtx | MutationCtx) {
   const { userId, user } = await requireUser(ctx);
-  if (user.role !== "admin") throw new Error("Not authorized");
+  if (user.role !== "admin") throw new Error("Not authorized: Admin access required.");
   return { userId, user };
 }
+

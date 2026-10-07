@@ -6,6 +6,8 @@ This document details the database schema for the **MB Ventures GH** online shop
 
 ## Tables Overview
 
+The schema also spreads `authTables` from `@convex-dev/auth`, which provides the built-in auth tables (`sessions`, `accounts`, `verifications`). They are not listed below.
+
 | Table | Purpose | Primary Indexes |
 | --- | --- | --- |
 | `users` | Customer & admin user profiles | `by_email`, `by_role` |
@@ -13,14 +15,13 @@ This document details the database schema for the **MB Ventures GH** online shop
 | `products` | Catalog items, specs, pricing, and stock | `by_slug`, `by_category_active`, `by_active_created`, `by_featured_active`, `by_sku`, `by_brand`, search: `search_text` |
 | `carts` | Persistent shopping carts for authenticated users | `by_user` |
 | `addresses` | Saved customer delivery addresses | `by_user` |
-| `orders` | Customer purchases, fulfillment info, and payments | `by_order_number`, `by_user_created`, `by_status_created`, `by_payment_status`, `by_checkout_key`, `by_email`, `by_expires_at`, `by_needs_attention` |
+| `orders` | Customer purchases, fulfillment info, and payments | `by_order_number`, `by_user_created`, `by_status_created`, `by_payment_status`, `by_payment_method`, `by_checkout_key`, `by_email`, `by_expires_at`, `by_needs_attention` |
 | `orderEvents` | Immutable chronological event log for orders | `by_order_created` |
 | `deliveryZones` | Dispatch geographical zones & shipping fees | `by_active_and_sort` |
 | `pickupLocations` | Physical store pickup points & opening hours | `by_active_and_sort` |
 | `siteSettings` | Global shop branding, announcement, hero & policies | Singleton |
 | `pages` | Markdown content pages (About, Terms, Warranty, etc.) | `by_slug` |
 | `contactMessages` | Customer inquiries submitted via contact form | `by_created` |
-| `paymentEvents` | Idempotent log of Paystack webhooks & verification | `by_event_key`, `by_reference` |
 | `stockAdjustments` | Comprehensive audit trail for physical & reserved inventory | `by_product_created` |
 | `counters` | Atomic sequence counters (e.g. for order number generation) | `by_name` |
 | `auditLogs` | Administrative action audit trail | `by_created`, `by_entity` |
@@ -75,7 +76,7 @@ The core catalog item table containing product details, stock levels, specs, and
   - `stock`: `number` – Physical units currently on hand in the warehouse/store.
   - `reservedStock`: `number` – Units held by orders awaiting payment (`available = stock - reservedStock`).
   - `imageIds`: `array of id("_storage")` – Stored product photos.
-  - `specs`: `array of { label: string, value: string }` – Technical specifications table.
+  - `specs`: `array of { group?: string, label: string, value: string }` – Technical specifications table (`group` buckets rows under a heading).
   - `isActive`: `boolean` – Storefront visibility flag.
   - `isFeatured`: `boolean` – Flag for homepage spotlight and recommended carousel.
   - `searchText`: `string` – Lowercased combination of `name + brand + sku + category` maintained on write for fast search.
@@ -140,9 +141,12 @@ The master order record. Captures frozen snapshots of purchased items, prices, a
   - `deliveryFee`: `number` – Delivery shipping fee in pesewas.
   - `total`: `number` – Total payable in pesewas (`subtotal + deliveryFee`).
   - `currency`: `string` – Currency code (e.g. `"GHS"`).
-  - `status`: Order status string (`pending_payment`, `paid`, `processing`, `ready_for_pickup`, `out_for_delivery`, `completed`, `cancelled`).
-  - `paymentStatus`: Payment status string (`unpaid`, `paid`, `failed`, `refund_pending`, `refunded`).
-  - `paymentReferences`: `array of string` – Paystack reference strings associated with this order.
+  - `status`: Order status string (`pending`, `awaiting_momo`, `pending_verification`, `processing`, `ready_for_pickup`, `out_for_delivery`, `completed`, `cancelled`).
+  - `paymentMethod`: `"momo" | "cash_on_delivery" | "pay_in_store"` – How the customer will pay. No payment gateway.
+  - `paymentStatus`: Payment status string (`unpaid`, `pending_verification`, `paid`, `refunded`).
+  - `momoNetwork`: `"MTN" | "Telecel" | "AirtelTigo"` (optional) – Network the customer transferred from. Empty for COD / pay-in-store.
+  - `momoPhone`: `string` (optional) – MoMo number the transfer was sent from.
+  - `momoReference`: `string` (optional) – Transaction reference the customer submitted; admin confirms it against the shop's MoMo account.
   - `paidAt`: `number` (optional) – Timestamp when payment was verified.
   - `cancelReason`: `string` (optional) – Reason if cancelled.
   - `needsAttention`: `boolean` – Flag signaling manual staff review (e.g. overpayment, stock discrepancy).
@@ -157,10 +161,16 @@ The master order record. Captures frozen snapshots of purchased items, prices, a
   - `by_user_created` (`userId`, `createdAt`): Customer order history list.
   - `by_status_created` (`status`, `createdAt`): Admin order queue filtering by status.
   - `by_payment_status` (`paymentStatus`): Admin finance and reconciliation filtering.
+  - `by_payment_method` (`paymentMethod`): Filter orders by MoMo, cash on delivery, or pay in store.
   - `by_checkout_key` (`checkoutKey`): Idempotency check during checkout creation.
   - `by_email` (`customer.email`): Public guest tracking lookup and customer lookup.
   - `by_expires_at` (`status`, `expiresAt`): Scheduled cron query for releasing unpaid expired orders.
   - `by_needs_attention` (`needsAttention`): Admin dashboard attention inbox.
+
+**Status flow** (enforced by `convex/lib/orderStatus.ts`):
+- MoMo: `pending → awaiting_momo → pending_verification → processing → out_for_delivery | ready_for_pickup → completed`
+- COD / pay in store: `pending → processing → out_for_delivery | ready_for_pickup → completed`
+- `cancelled` is reachable from any non-terminal state and releases the stock reservation.
 
 ---
 
@@ -212,7 +222,7 @@ Global storefront configurations, branding metadata, announcements, and threshol
   - `shopName`: `string` – Name of shop ("MB Ventures GH").
   - `tagline`: `string` – Sub-headline.
   - `currency`: `string` – Primary currency ("GHS").
-  - `defaultCountryCode`: `string` – Telephone prefix ("+233").
+  - `defaultCountryCode`: `string` – Telephone prefix used for formatting phone numbers. Seeded as `GH`; `lib/phone.ts` expects the `+233` form.
   - `contactEmail`: `string` – Public contact email.
   - `contactPhone`: `string` – Public customer service phone.
   - `whatsappNumber`: `string` – Direct WhatsApp support line.
@@ -220,12 +230,15 @@ Global storefront configurations, branding metadata, announcements, and threshol
   - `announcement`: `{ enabled: boolean, text: string, link?: string }` – Top promotional banner.
   - `hero`: `{ title, subtitle, buttonText, buttonLink, imageId? }` – Homepage hero configuration.
   - `promoTiles`: `array of { title, subtitle, link, imageId? }` – Up to 3 featured promo tiles.
+  - `momoAccounts`: `array of { network, number, name }` – The shop's own MoMo numbers, displayed to the customer at checkout so they know where to send money and whose name to expect.
+  - `cashOnDeliveryEnabled`: `boolean` – Toggles cash on delivery as an offered payment method.
+  - `payInStoreEnabled`: `boolean` – Toggles pay at the pickup counter as an offered payment method.
   - `freeDeliveryThreshold`: `number` (optional) – Minimum order in pesewas for free shipping.
   - `orderExpiryMinutes`: `number` – Time limit for pending unpaid orders (e.g. 60 min).
   - `lowStockThreshold`: `number` – Threshold alerting low inventory (e.g. 5).
   - `maxCartQuantity`: `number` – Max allowable quantity per item in cart (e.g. 10).
   - `pricesIncludeTaxNote`: `string` – Legal disclaimer note on pricing and VAT.
-  - `socialLinks`: `{ facebook?, instagram?, x?, tiktok?, youtube? }` – Social profile URLs.
+  - `socialLinks`: `{ facebook?, instagram?, x?, tiktok?, youtube?, whatsapp? }` – Social profile URLs.
 
 ---
 
@@ -258,22 +271,7 @@ Customer messages sent through the `/contact` form.
 
 ---
 
-### 13. `paymentEvents`
-Webhook event and transaction verification ledger for idempotent Paystack processing.
-- **Fields:**
-  - `eventKey`: `string` – Unique key (`reference + eventType`).
-  - `reference`: `string` – Paystack payment reference.
-  - `eventType`: `string` – Paystack webhook event name (e.g. `charge.success`).
-  - `receivedAt`: `number` – Ingestion timestamp.
-  - `processedAt`: `number` (optional) – Processing completion timestamp.
-  - `outcome`: `string` – Processing result status (`success`, `duplicate_ignored`, `failed`).
-- **Indexes:**
-  - `by_event_key` (`eventKey`): Instant check preventing duplicate webhook execution.
-  - `by_reference` (`reference`): Audit trace for all events under a transaction reference.
-
----
-
-### 14. `stockAdjustments`
+### 13. `stockAdjustments`
 Strict double-entry style inventory journal recording all stock changes.
 - **Fields:**
   - `productId`: `id("products")` – Product adjusted.
@@ -288,7 +286,7 @@ Strict double-entry style inventory journal recording all stock changes.
 
 ---
 
-### 15. `counters`
+### 14. `counters`
 Atomic sequence counters for generating sequential codes (e.g. `ORD-000001`).
 - **Fields:**
   - `name`: `string` – Counter key name (e.g. `"order_number"`).
@@ -298,7 +296,7 @@ Atomic sequence counters for generating sequential codes (e.g. `ORD-000001`).
 
 ---
 
-### 16. `auditLogs`
+### 15. `auditLogs`
 Audit log recording every administrative mutation.
 - **Fields:**
   - `actorId`: `string` (optional) – Admin ID who performed the action.
@@ -313,7 +311,7 @@ Audit log recording every administrative mutation.
 
 ---
 
-### 17. `emailLogs`
+### 16. `emailLogs`
 Transactional email dispatch log.
 - **Fields:**
   - `to`: `string` – Recipient email address.

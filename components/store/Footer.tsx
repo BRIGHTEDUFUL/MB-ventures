@@ -140,10 +140,7 @@ export function Footer({
               </li>
               {categories.map((cat) => (
                 <li key={cat._id}>
-                  <Link
-                    href={`/category/${cat.slug}`}
-                    className="hover:text-ink transition-colors"
-                  >
+                  <Link href={`/category/${cat.slug}`} className="hover:text-ink transition-colors">
                     {cat.name}
                   </Link>
                 </li>
@@ -223,7 +220,9 @@ export function Footer({
       {/* Sub-footer bottom bar */}
       <div className="border-t border-line bg-surface py-4">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-ink-muted">
-          <p>© {currentYear} {shopName || "MB Ventures GH"}. All rights reserved.</p>
+          <p>
+            © {currentYear} {shopName || "MB Ventures GH"}. All rights reserved.
+          </p>
           <div className="flex items-center gap-4 text-xs">
             <Link href="/terms" className="hover:text-ink">
               Terms of Service

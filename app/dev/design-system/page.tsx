@@ -9,9 +9,61 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Price } from "@/components/shared/Price";
+import { TokenValue } from "@/components/dev/TokenValue";
 import { ArrowRight, AlertCircle, ShoppingBag } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+// Every colour token in app/globals.css, grouped the way docs/DESIGN.md groups them.
+const COLOR_TOKEN_GROUPS: Array<{
+  title: string;
+  tokens: Array<{ name: string; variable: string; swatch: string }>;
+}> = [
+  {
+    title: "Structure — blue-tinted slate",
+    tokens: [
+      { name: "ink", variable: "--ink", swatch: "bg-ink" },
+      { name: "ink-muted", variable: "--ink-muted", swatch: "bg-ink-muted" },
+      { name: "ink-subtle", variable: "--ink-subtle", swatch: "bg-ink-subtle" },
+      { name: "surface", variable: "--surface", swatch: "bg-surface" },
+      { name: "canvas", variable: "--canvas", swatch: "bg-canvas" },
+      { name: "canvas-strong", variable: "--canvas-strong", swatch: "bg-canvas-strong" },
+      { name: "line", variable: "--line", swatch: "bg-line" },
+      { name: "line-strong", variable: "--line-strong", swatch: "bg-line-strong" },
+    ],
+  },
+  {
+    title: "Brand — every interactive control",
+    tokens: [
+      { name: "brand", variable: "--brand", swatch: "bg-brand" },
+      { name: "brand-hover", variable: "--brand-hover", swatch: "bg-brand-hover" },
+      { name: "brand-active", variable: "--brand-active", swatch: "bg-brand-active" },
+      { name: "brand-soft", variable: "--brand-soft", swatch: "bg-brand-soft" },
+      { name: "link", variable: "--link", swatch: "bg-link" },
+      { name: "focus", variable: "--focus", swatch: "bg-focus" },
+    ],
+  },
+  {
+    title: "Accent — offers and sale prices only",
+    tokens: [
+      { name: "accent", variable: "--accent", swatch: "bg-accent" },
+      { name: "accent-hover", variable: "--accent-hover", swatch: "bg-accent-hover" },
+      { name: "accent-soft", variable: "--accent-soft", swatch: "bg-accent-soft" },
+    ],
+  },
+  {
+    title: "Status",
+    tokens: [
+      { name: "success", variable: "--success", swatch: "bg-success" },
+      { name: "success-soft", variable: "--success-soft", swatch: "bg-success-soft" },
+      { name: "warning", variable: "--warning", swatch: "bg-warning" },
+      { name: "warning-soft", variable: "--warning-soft", swatch: "bg-warning-soft" },
+      { name: "danger", variable: "--danger", swatch: "bg-danger" },
+      { name: "danger-hover", variable: "--danger-hover", swatch: "bg-danger-hover" },
+      { name: "danger-soft", variable: "--danger-soft", swatch: "bg-danger-soft" },
+    ],
+  },
+];
 
 export default function DesignSystemPage() {
   if (process.env.NODE_ENV === "production") {
@@ -39,53 +91,22 @@ export default function DesignSystemPage() {
           <h2 className="text-xl font-heading font-semibold text-ink border-b border-line pb-2">
             1. Color Tokens
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 text-xs">
-            <div className="p-3 bg-surface border border-line rounded-md">
-              <div className="h-10 bg-ink rounded-sm mb-2" />
-              <div className="font-semibold">ink</div>
-              <div className="text-ink-muted font-mono">#14181F</div>
+          {COLOR_TOKEN_GROUPS.map((group) => (
+            <div key={group.title} className="space-y-3">
+              <h3 className="text-xs font-mono uppercase tracking-widest text-ink-subtle">
+                {group.title}
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 text-xs">
+                {group.tokens.map((token) => (
+                  <div key={token.name} className="p-3 bg-surface border border-line rounded-md">
+                    <div className={`h-10 ${token.swatch} rounded-sm mb-2 border border-line`} />
+                    <div className="font-semibold">{token.name}</div>
+                    <TokenValue name={token.variable} />
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="p-3 bg-surface border border-line rounded-md">
-              <div className="h-10 bg-ink-muted rounded-sm mb-2" />
-              <div className="font-semibold">ink-muted</div>
-              <div className="text-ink-muted font-mono">#5B6470</div>
-            </div>
-            <div className="p-3 bg-surface border border-line rounded-md">
-              <div className="h-10 bg-canvas rounded-sm border border-line mb-2" />
-              <div className="font-semibold">canvas</div>
-              <div className="text-ink-muted font-mono">#F4F5F6</div>
-            </div>
-            <div className="p-3 bg-surface border border-line rounded-md">
-              <div className="h-10 bg-line-strong rounded-sm mb-2" />
-              <div className="font-semibold">line-strong</div>
-              <div className="text-ink-muted font-mono">#CDD1D6</div>
-            </div>
-            <div className="p-3 bg-surface border border-line rounded-md">
-              <div className="h-10 bg-accent rounded-sm mb-2" />
-              <div className="font-semibold">accent</div>
-              <div className="text-ink-muted font-mono">#D9480F</div>
-            </div>
-            <div className="p-3 bg-surface border border-line rounded-md">
-              <div className="h-10 bg-link rounded-sm mb-2" />
-              <div className="font-semibold">link / focus</div>
-              <div className="text-ink-muted font-mono">#0A5CC2</div>
-            </div>
-            <div className="p-3 bg-surface border border-line rounded-md">
-              <div className="h-10 bg-success rounded-sm mb-2" />
-              <div className="font-semibold">success</div>
-              <div className="text-ink-muted font-mono">#1B7F4B</div>
-            </div>
-            <div className="p-3 bg-surface border border-line rounded-md">
-              <div className="h-10 bg-warning rounded-sm mb-2" />
-              <div className="font-semibold">warning</div>
-              <div className="text-ink-muted font-mono">#A15C00</div>
-            </div>
-            <div className="p-3 bg-surface border border-line rounded-md">
-              <div className="h-10 bg-danger rounded-sm mb-2" />
-              <div className="font-semibold">danger</div>
-              <div className="text-ink-muted font-mono">#C62828</div>
-            </div>
-          </div>
+          ))}
         </section>
 
         {/* 2. Typography Scale */}
@@ -95,29 +116,42 @@ export default function DesignSystemPage() {
           </h2>
           <div className="bg-surface border border-line rounded-lg p-6 space-y-6">
             <div>
-              <span className="text-xs font-mono text-ink-muted block mb-1">Display Title (clamp 2.5rem to 4.25rem)</span>
+              <span className="text-xs font-mono text-ink-muted block mb-1">
+                Display Title (clamp 2.5rem to 4.25rem)
+              </span>
               <p className="display-title">Ergonomic Office Chairs</p>
             </div>
             <div>
-              <span className="text-xs font-mono text-ink-muted block mb-1">Heading 1 (clamp 2rem to 3rem)</span>
+              <span className="text-xs font-mono text-ink-muted block mb-1">
+                Heading 1 (clamp 2rem to 3rem)
+              </span>
               <h1>Precision Hardware & Accessories</h1>
             </div>
             <div>
-              <span className="text-xs font-mono text-ink-muted block mb-1">Heading 2 (clamp 1.5rem to 2rem)</span>
+              <span className="text-xs font-mono text-ink-muted block mb-1">
+                Heading 2 (clamp 1.5rem to 2rem)
+              </span>
               <h2>Featured Workstation Desks</h2>
             </div>
             <div>
-              <span className="text-xs font-mono text-ink-muted block mb-1">Heading 3 (1.25rem / 20px)</span>
+              <span className="text-xs font-mono text-ink-muted block mb-1">
+                Heading 3 (1.25rem / 20px)
+              </span>
               <h3>Technical Specifications & Overview</h3>
             </div>
             <div>
-              <span className="text-xs font-mono text-ink-muted block mb-1">Body Text (16px base, Public Sans)</span>
+              <span className="text-xs font-mono text-ink-muted block mb-1">
+                Body Text (16px base, Public Sans)
+              </span>
               <p className="text-ink text-base max-w-2xl">
-                All components are built with premium materials. Physical units are held in our Accra warehouse and backed by manufacturer warranty.
+                All components are built with premium materials. Physical units are held in our
+                Accra warehouse and backed by manufacturer warranty.
               </p>
             </div>
             <div>
-              <span className="text-xs font-mono text-ink-muted block mb-1">Mono & Tabular Numbers (IBM Plex Mono)</span>
+              <span className="text-xs font-mono text-ink-muted block mb-1">
+                Mono & Tabular Numbers (IBM Plex Mono)
+              </span>
               <div className="flex flex-wrap gap-6 items-center">
                 <span className="mono-specs text-ink-muted">SKU: MB-CHAIR-ERG01</span>
                 <Price amount={245000} className="text-lg" />
@@ -134,21 +168,11 @@ export default function DesignSystemPage() {
           </h2>
           <div className="bg-surface border border-line rounded-lg p-6 space-y-6">
             <div className="flex flex-wrap gap-4 items-center">
-              <Button variant="primary">
-                Add to cart
-              </Button>
-              <Button variant="secondary">
-                View specifications
-              </Button>
-              <Button variant="accent">
-                Claim offer
-              </Button>
-              <Button variant="destructive">
-                Remove item
-              </Button>
-              <Button variant="ghost">
-                Cancel
-              </Button>
+              <Button variant="primary">Add to cart</Button>
+              <Button variant="secondary">View specifications</Button>
+              <Button variant="accent">Claim offer</Button>
+              <Button variant="destructive">Remove item</Button>
+              <Button variant="ghost">Cancel</Button>
               <Button variant="tertiary">
                 Read guide
                 <ArrowRight className="w-4 h-4 ml-1" />
@@ -156,11 +180,21 @@ export default function DesignSystemPage() {
             </div>
 
             <div className="border-t border-line pt-4 flex flex-wrap gap-4 items-center">
-              <Button size="sm" variant="secondary">Small (36px)</Button>
-              <Button size="md" variant="secondary">Medium (44px)</Button>
-              <Button size="lg" variant="primary">Large (52px)</Button>
-              <Button loading loadingText="Saving..." variant="primary">Submit</Button>
-              <Button disabled variant="primary">Disabled</Button>
+              <Button size="sm" variant="secondary">
+                Small (36px)
+              </Button>
+              <Button size="md" variant="secondary">
+                Medium (44px)
+              </Button>
+              <Button size="lg" variant="primary">
+                Large (52px)
+              </Button>
+              <Button loading loadingText="Saving..." variant="primary">
+                Submit
+              </Button>
+              <Button disabled variant="primary">
+                Disabled
+              </Button>
             </div>
           </div>
         </section>
@@ -194,7 +228,11 @@ export default function DesignSystemPage() {
 
             <div className="space-y-2">
               <Label htmlFor="demo-input-err">Full street address</Label>
-              <Input id="demo-input-err" defaultValue="Spintex Road" className="border-danger focus-visible:ring-danger" />
+              <Input
+                id="demo-input-err"
+                defaultValue="Spintex Road"
+                className="border-danger focus-visible:ring-danger"
+              />
               <p className="text-xs text-danger flex items-center gap-1">
                 <AlertCircle className="w-3.5 h-3.5" />
                 Please include house number or landmark.

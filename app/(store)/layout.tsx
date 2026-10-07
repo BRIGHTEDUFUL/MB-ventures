@@ -7,18 +7,15 @@ import { Footer } from "@/components/store/Footer";
 
 export const dynamic = "force-dynamic";
 
-export default async function StoreLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default async function StoreLayout({ children }: { children: ReactNode }) {
   const [categories, settings] = await Promise.all([
     fetchQuery(api.categories.list, { parentId: null }).catch(() => []),
     fetchQuery(api.siteSettings.getPublicSettings, {}).catch(() => null),
   ]);
 
   const shopName = settings?.shopName || "MB Ventures GH";
-  const tagline = settings?.tagline || "Premium Computer Accessories, Hardware & Ergonomic Office Furniture";
+  const tagline =
+    settings?.tagline || "Premium Computer Accessories, Hardware & Ergonomic Office Furniture";
   const supportEmail = settings?.contactEmail || "orders@mbventuresgh.com";
   const supportPhone = settings?.contactPhone || "+233 24 000 0000";
   const whatsappNumber = settings?.whatsappNumber || "+233 24 000 0000";
@@ -26,9 +23,7 @@ export default async function StoreLayout({
 
   return (
     <div className="flex flex-col min-h-screen bg-surface text-ink antialiased">
-      {settings?.announcement && (
-        <AnnouncementBar announcement={settings.announcement} />
-      )}
+      {settings?.announcement && <AnnouncementBar announcement={settings.announcement} />}
       <Header
         categories={categories || []}
         shopName={shopName}

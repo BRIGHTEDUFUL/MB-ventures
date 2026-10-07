@@ -1,6 +1,21 @@
 # Store Decisions & Configurations
 
-Please fill in the `[FILL IN]` fields before Step 10.
+Source of truth for storefront configuration. Runtime values live in the `siteSettings` Convex table and are written by `convex/seed.ts`. Anything marked **PLACEHOLDER** is a seeded dummy value and must be replaced before launch.
+
+---
+
+## Launch blockers (placeholders seeded in `convex/seed.ts`)
+
+| Field | Seeded value | Replace with |
+| --- | --- | --- |
+| `siteSettings.contactPhone` | `+233 24 000 0000` | Real support line |
+| `siteSettings.whatsappNumber` | `+233 24 000 0000` | Real WhatsApp line |
+| `pickupLocations[0].phone` | `+233 24 000 0000` | Real branch line |
+| `momoAccounts[0].number` (MTN) | `0240000000` | Real MoMo wallet |
+| `momoAccounts[1].number` (Telecel) | `0200000000` | Real MoMo wallet |
+| `socialLinks.whatsapp` | `wa.me/233240000000` | Real WhatsApp link |
+
+**Risk if skipped**: customers transfer money to numbers nobody owns, and support links go nowhere.
 
 ---
 
@@ -21,36 +36,45 @@ Please fill in the `[FILL IN]` fields before Step 10.
 - **Shop Name**: MB Ventures GH
 - **Tagline**: Premium Computer Accessories, Hardware & Ergonomic Office Furniture
 - **Brand Colors**: Primary Vibrant Blue (`#0284c7` / `#2563eb`), Accent Vibrant Orange/Amber (`#ea580c` / `#f97316`), Dark Slate Neutral (`#0f172a`)
+  - Note: storefront component styling uses the `docs/DESIGN.md` token set (`ink`, `canvas`, `line`, `accent #D9480F`). The blue/orange pair above is the brand identity, not the CSS token values. Confirm which one wins before adding new pages.
 - **Logo Status**: Ready ([Logo.jpeg](file:///c:/Users/NHANA_K_OTTO/Desktop/Online%20Shop/Logo.jpeg))
-- **Production Domain**: [FILL IN]
+- **Production Domain**: `[FILL IN]`
 
 ### 2. Contact Information
-- **Support Email**: [FILL IN]
-- **Email Sender Address** (e.g. `Shop Name <orders@yourdomain.com>`): [FILL IN]
-- **Support Phone**: [FILL IN]
-- **WhatsApp Number** (for customer support & share buttons): [FILL IN]
-- **Default Phone Country Code** (e.g. `+233` for Ghana): [FILL IN - default: +233]
-- **Physical Address**: [FILL IN]
+- **Support Email**: `orders@mbventuresgh.com`
+- **Email Sender Address**: `[FILL IN]` — e.g. `MB Ventures GH <orders@mbventuresgh.com>`. Required before Resend is wired up.
+- **Support Phone**: `[PLACEHOLDER] +233 24 000 0000`
+- **WhatsApp Number**: `[PLACEHOLDER] +233 24 000 0000` (also seeded as `https://wa.me/233240000000`)
+- **Default Phone Country Code**: seeded as `GH`, but `lib/phone.ts` expects the `+233` form and will render `+GH`. Pick one and align the seed.
+- **Physical Address**: Circle Commercial Area, Accra, Ghana
+- **Pickup Branch**: MB Ventures Main Store, Circle Commercial District, Accra, Ghana, Mon - Sat 8:00 AM - 6:00 PM, phone `[PLACEHOLDER] +233 24 000 0000`
 
 ### 3. Currency & Pricing
-- **Currency Code**: [FILL IN - default: GHS]
-- **Whether Prices Include Tax**: [FILL IN - e.g. Yes, all prices inclusive of VAT/NHIL]
+- **Currency Code**: GHS (amounts stored as integer pesewas)
+- **Prices Include Tax**: Yes — seeded note is "All prices inclusive of taxes". Confirm this matches the actual VAT/NHIL position before launch.
 
 ### 4. Delivery & Pickup
-- **Delivery Zones** (Name, Fee in currency, Estimated time):
-  1. [FILL IN - Zone 1, Fee, Estimated Delivery Time]
-  2. [FILL IN - Zone 2, Fee, Estimated Delivery Time]
-  3. [FILL IN - Zone 3, Fee, Estimated Delivery Time]
-- **Pickup Locations** (Name, Address, Phone, Opening Hours):
-  1. [FILL IN - Location 1 Name, Address, Phone, Hours]
-  2. [FILL IN - Location 2 Name, Address, Phone, Hours]
-- **Free Delivery Threshold** (Optional minor/major amount): [FILL IN - e.g. GHS 500 or None]
+- **Delivery Zones** (fee in pesewas, seeded in `convex/seed.ts`):
+  1. Accra Central & Surroundings — GHS 35.00 — Same day / 24 hours
+  2. Greater Accra (Tema, Kasoa, Adenta) — GHS 50.00 — 1 - 2 business days
+  3. Other Regions (Kumasi, Takoradi, Tamale) — GHS 80.00 — 2 - 3 business days via VIP/OA Express
+- **Pickup Locations**:
+  1. MB Ventures Main Store — Circle Commercial District, Accra, Ghana — Mon - Sat: 8:00 AM - 6:00 PM — phone `[PLACEHOLDER]`
+- **Free Delivery Threshold**: GHS 5,000 (500000 pesewas). Set to none by clearing `siteSettings.freeDeliveryThreshold`.
 
 ### 5. Order & Inventory Settings
-- **Unpaid Order Expiry Minutes**: [FILL IN - default: 30]
-- **Low-Stock Threshold**: [FILL IN - default: 3]
-- **Max Quantity Per Cart Line**: [FILL IN - default: 10]
+- **Unpaid Order Expiry Minutes**: 30
+- **Low-Stock Threshold**: 3
+- **Max Quantity Per Cart Line**: 10
 
-### 6. Policies & Legal Summaries
-- **Returns Policy Summary**: [FILL IN]
-- **Warranty Policy Summary**: [FILL IN]
+### 6. Payment Methods
+- **MoMo (MTN, Telecel, AirtelTigo)**: enabled. Customer transfers manually and submits a reference; admin verifies.
+  - Shop wallets seeded: MTN `0240000000` **[PLACEHOLDER]**, Telecel `0200000000` **[PLACEHOLDER]**. No AirtelTigo wallet seeded yet.
+- **Cash on Delivery**: enabled (`cashOnDeliveryEnabled: true`)
+- **Pay In Store**: enabled (`payInStoreEnabled: true`)
+
+### 7. Policies & Legal Summaries
+- **Returns Policy Summary**: `[FILL IN]`
+- **Warranty Policy Summary**: `[FILL IN]`
+- **Delivery & Pickup Policy**: `[FILL IN]`
+- **Privacy Policy / Terms**: `[FILL IN]` — these belong in the `pages` table once the content page step lands.

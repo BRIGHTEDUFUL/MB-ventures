@@ -75,7 +75,7 @@ export function ProductGallery({
               aria-label={`Select product image ${idx + 1}`}
               className={`w-16 h-16 rounded-md bg-canvas border p-1.5 shrink-0 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ${
                 selectedIndex === idx
-                  ? "border-ink ring-1 ring-ink"
+                  ? "border-brand ring-1 ring-brand"
                   : "border-line hover:border-line-strong"
               }`}
             >

@@ -4,15 +4,31 @@ import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Container } from "@/components/shared/Container";
 import { ProductCard } from "@/components/store/ProductCard";
-import { ChevronRight, SlidersHorizontal, PackageX } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Check, ChevronDown, ChevronRight, SlidersHorizontal } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "All Products",
   description:
-    "Explore our complete catalog of ergonomic chairs, motorized standing desks, mechanical keyboards, monitors, and PC hardware.",
+    "Browse our complete catalog of ergonomic chairs, motorized standing desks, mechanical keyboards, monitors, and PC hardware.",
 };
+
+const FOCUS_RING =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
+
+const SORT_OPTIONS = [
+  { value: "latest", label: "Newest" },
+  { value: "price_asc", label: "Price: low to high" },
+  { value: "price_desc", label: "Price: high to low" },
+] as const;
 
 interface CatalogPageProps {
   searchParams: Promise<{
@@ -39,26 +55,31 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   ]);
 
   const activeCategory = categories.find((c) => c.slug === activeCategorySlug);
+  const activeSortLabel =
+    SORT_OPTIONS.find((option) => option.value === currentSort)?.label ?? "Newest";
 
   return (
     <div className="py-8 sm:py-12 space-y-8">
       <Container size="default">
         {/* Breadcrumb Navigation */}
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-ink-muted mb-4">
-          <Link href="/" className="hover:text-ink transition-colors">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-1.5 text-xs text-ink-muted mb-4 flex-wrap"
+        >
+          <Link href="/" className="hover:text-ink transition-colors duration-120">
             Home
           </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-ink-subtle" />
+          <ChevronRight className="w-3.5 h-3.5 text-ink-subtle shrink-0" aria-hidden="true" />
           <span className="text-ink font-medium">Catalog</span>
           {activeCategory && (
             <>
-              <ChevronRight className="w-3.5 h-3.5 text-ink-subtle" />
+              <ChevronRight className="w-3.5 h-3.5 text-ink-subtle shrink-0" aria-hidden="true" />
               <span className="text-ink font-semibold">{activeCategory.name}</span>
             </>
           )}
           {searchQuery && (
             <>
-              <ChevronRight className="w-3.5 h-3.5 text-ink-subtle" />
+              <ChevronRight className="w-3.5 h-3.5 text-ink-subtle shrink-0" aria-hidden="true" />
               <span className="text-ink font-semibold">Search: &ldquo;{searchQuery}&rdquo;</span>
             </>
           )}
@@ -69,14 +90,14 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
           <div>
             <h1 className="font-heading font-bold text-2xl sm:text-3xl text-ink tracking-tight">
               {searchQuery
-                ? `Results for "${searchQuery}"`
+                ? `Results for “${searchQuery}”`
                 : activeCategory
-                ? activeCategory.name
-                : "Workspace & Computing Catalog"}
+                  ? activeCategory.name
+                  : "Workspace & Computing Catalog"}
             </h1>
             <p className="text-xs sm:text-sm text-ink-muted mt-1 max-w-xl">
               {searchQuery
-                ? `Showing matching hardware, accessories, and ergonomics in stock.`
+                ? "Showing matching hardware, accessories, and ergonomics in stock."
                 : activeCategory?.description ||
                   "Specialist computing hardware, mechanical peripherals, ergonomic seating, and motorized desks."}
             </p>
@@ -89,14 +110,19 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 
         {/* Filters & Sorting Bar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-6">
-          {/* Category Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+          {/* Category filter chips */}
+          <div
+            className="flex flex-wrap items-center gap-2"
+            role="group"
+            aria-label="Filter by category"
+          >
             <Link
               href={searchQuery ? `/catalog?q=${encodeURIComponent(searchQuery)}` : "/catalog"}
-              className={`px-3 py-1.5 rounded text-xs font-medium shrink-0 transition-colors ${
+              aria-current={!activeCategorySlug ? "page" : undefined}
+              className={`min-h-11 px-4 rounded-md text-sm font-medium shrink-0 flex items-center border transition-colors duration-120 ease-snap ${FOCUS_RING} ${
                 !activeCategorySlug
-                  ? "bg-ink text-surface"
-                  : "bg-surface border border-line text-ink hover:bg-canvas"
+                  ? "bg-brand-soft text-brand border-brand"
+                  : "bg-surface border-line text-ink hover:border-line-strong hover:bg-canvas"
               }`}
             >
               All Categories
@@ -108,10 +134,11 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                 <Link
                   key={cat._id}
                   href={href}
-                  className={`px-3 py-1.5 rounded text-xs font-medium shrink-0 transition-colors ${
+                  aria-current={isSelected ? "page" : undefined}
+                  className={`min-h-11 px-4 rounded-md text-sm font-medium shrink-0 flex items-center border transition-colors duration-120 ease-snap ${FOCUS_RING} ${
                     isSelected
-                      ? "bg-ink text-surface"
-                      : "bg-surface border border-line text-ink hover:bg-canvas"
+                      ? "bg-brand-soft text-brand border-brand"
+                      : "bg-surface border-line text-ink hover:border-line-strong hover:bg-canvas"
                   }`}
                 >
                   {cat.name}
@@ -120,43 +147,65 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
             })}
           </div>
 
-          {/* Sort Controls */}
+          {/* Sort dropdown */}
           {!searchQuery && (
-            <div className="flex items-center gap-2 shrink-0 self-end md:self-auto text-xs">
-              <SlidersHorizontal className="w-3.5 h-3.5 text-ink-muted" />
-              <span className="text-ink-muted">Sort:</span>
-              <div className="flex items-center gap-1">
-                <Link
-                  href={`/catalog?${activeCategorySlug ? `category=${activeCategorySlug}&` : ""}sort=latest`}
-                  className={`px-2.5 py-1 rounded text-xs transition-colors ${
-                    currentSort === "latest"
-                      ? "font-semibold text-ink bg-canvas border border-line"
-                      : "text-ink-muted hover:text-ink"
-                  }`}
+            <div className="flex items-center gap-2 shrink-0 self-end md:self-auto">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className={`inline-flex items-center gap-2 min-h-11 px-4 rounded-md border border-line-strong bg-surface text-sm text-ink hover:bg-canvas transition-colors duration-120 ease-snap ${FOCUS_RING}`}
+                  >
+                    <SlidersHorizontal
+                      className="w-4 h-4 text-ink-muted"
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
+                    <span className="text-ink-muted">Sort</span>
+                    <span className="font-semibold">{activeSortLabel}</span>
+                    <ChevronDown
+                      className="w-4 h-4 text-ink-muted"
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                  align="end"
+                  className="rounded-lg border border-line bg-surface shadow-layer p-1 text-ink"
                 >
-                  Newest
-                </Link>
-                <Link
-                  href={`/catalog?${activeCategorySlug ? `category=${activeCategorySlug}&` : ""}sort=price_asc`}
-                  className={`px-2.5 py-1 rounded text-xs transition-colors ${
-                    currentSort === "price_asc"
-                      ? "font-semibold text-ink bg-canvas border border-line"
-                      : "text-ink-muted hover:text-ink"
-                  }`}
-                >
-                  Price: Low to High
-                </Link>
-                <Link
-                  href={`/catalog?${activeCategorySlug ? `category=${activeCategorySlug}&` : ""}sort=price_desc`}
-                  className={`px-2.5 py-1 rounded text-xs transition-colors ${
-                    currentSort === "price_desc"
-                      ? "font-semibold text-ink bg-canvas border border-line"
-                      : "text-ink-muted hover:text-ink"
-                  }`}
-                >
-                  Price: High to Low
-                </Link>
-              </div>
+                  <DropdownMenuLabel className="text-xs font-normal uppercase tracking-[0.06em] text-ink-muted">
+                    Sort by
+                  </DropdownMenuLabel>
+                  {SORT_OPTIONS.map((option) => {
+                    const isSelected = currentSort === option.value;
+                    const href = `/catalog?${
+                      activeCategorySlug ? `category=${activeCategorySlug}&` : ""
+                    }sort=${option.value}`;
+                    return (
+                      <DropdownMenuItem
+                        key={option.value}
+                        asChild
+                        className={`min-h-11 gap-2 rounded-sm text-sm focus:bg-brand-soft focus:text-brand ${
+                          isSelected ? "bg-brand-soft text-brand font-semibold" : "text-ink"
+                        }`}
+                      >
+                        <Link href={href}>
+                          <span>{option.label}</span>
+                          {isSelected && (
+                            <Check
+                              className="w-4 h-4 ml-auto"
+                              strokeWidth={1.5}
+                              aria-hidden="true"
+                            />
+                          )}
+                        </Link>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           )}
         </div>
@@ -169,19 +218,20 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
             ))}
           </div>
         ) : (
-          <div className="p-12 text-center bg-canvas border border-line rounded-lg mt-6">
-            <PackageX className="w-10 h-10 text-ink-muted mx-auto mb-3" />
-            <h3 className="font-heading font-semibold text-base text-ink">
-              No products found
-            </h3>
-            <p className="text-xs text-ink-muted mt-1 max-w-sm mx-auto">
-              We couldn&apos;t find any items matching your selected criteria.
+          <div className="border-t border-line mt-6 pt-8 max-w-md">
+            <h2 className="font-heading font-semibold text-base text-ink">
+              {searchQuery ? "No products match this search" : "No products in this selection"}
+            </h2>
+            <p className="text-sm text-ink-muted mt-2 leading-relaxed">
+              {searchQuery
+                ? "Check the spelling or try a shorter keyword, or clear the filter to see everything we stock."
+                : "Clear the category filter to see everything we stock."}
             </p>
             <Link
               href="/catalog"
-              className="inline-flex items-center justify-center mt-4 px-4 py-2 rounded-md bg-ink text-surface text-xs font-semibold hover:bg-ink/90 transition-colors"
+              className={`inline-flex items-center justify-center gap-1.5 min-h-11 px-5 mt-4 rounded-md bg-brand text-surface text-sm font-semibold hover:bg-brand-hover active:bg-brand-active transition-colors duration-120 ease-snap ${FOCUS_RING}`}
             >
-              Reset all filters
+              <span>Browse all products</span>
             </Link>
           </div>
         )}

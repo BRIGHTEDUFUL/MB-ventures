@@ -5,28 +5,28 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors duration-120 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors duration-120 ease-snap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-50 select-none",
   {
     variants: {
       variant: {
-        primary: "bg-ink text-white hover:bg-[#28303d] active:bg-[#0c0e12]",
-        default: "bg-ink text-white hover:bg-[#28303d] active:bg-[#0c0e12]",
+        primary: "bg-brand text-white hover:bg-brand-hover active:bg-brand-active",
+        default: "bg-brand text-white hover:bg-brand-hover active:bg-brand-active",
         secondary:
-          "border border-line-strong bg-transparent text-ink hover:bg-canvas active:bg-canvas-strong",
+          "border border-line-strong bg-surface text-ink hover:bg-canvas active:bg-canvas-strong",
         outline:
           "border border-line-strong bg-transparent text-ink hover:bg-canvas active:bg-canvas-strong",
         tertiary:
-          "bg-transparent text-ink hover:underline p-0 h-auto font-medium shadow-none",
-        link: "bg-transparent text-ink hover:underline p-0 h-auto font-medium shadow-none",
-        accent: "bg-accent text-white hover:bg-[#c03f0b] active:bg-[#a83407]",
-        destructive:
-          "bg-danger text-white hover:bg-[#b02222] active:bg-[#961c1c]",
+          "bg-transparent text-ink hover:text-brand hover:underline p-0 h-auto font-medium shadow-none",
+        link: "bg-transparent text-brand hover:underline p-0 h-auto font-medium shadow-none",
+        accent: "bg-accent text-white hover:bg-accent-hover active:bg-accent-hover",
+        destructive: "bg-danger text-white hover:bg-danger-hover active:bg-danger-hover",
         ghost: "bg-transparent text-ink hover:bg-canvas active:bg-canvas-strong",
+        dark: "bg-brand text-white hover:bg-brand-hover active:bg-brand-active",
       },
       size: {
         default: "h-11 min-h-[44px] px-4 py-2",
         md: "h-11 min-h-[44px] px-4 py-2",
-        sm: "h-9 min-h-[36px] px-3 text-xs",
+        sm: "h-11 min-h-[44px] px-3 text-xs",
         lg: "h-[52px] min-h-[52px] px-6 text-base font-semibold",
         icon: "h-11 w-11 min-h-[44px] min-w-[44px] p-0",
       },
@@ -42,8 +42,7 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
   loadingText?: string;

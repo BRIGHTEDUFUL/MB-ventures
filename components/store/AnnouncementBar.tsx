@@ -32,11 +32,8 @@ export function AnnouncementBar({ announcement }: AnnouncementBarProps) {
   };
 
   return (
-    <aside
-      aria-label="Announcement"
-      className="bg-canvas-strong text-ink border-b border-line text-xs font-normal py-2 px-4 transition-colors duration-150"
-    >
-      <div className="max-w-[1280px] mx-auto flex items-center justify-between gap-3">
+    <aside className="bg-canvas-strong text-ink border-b border-line text-xs font-normal px-4 transition-colors duration-150">
+      <div className="max-w-[1280px] mx-auto flex min-h-[44px] items-center justify-between gap-3">
         <div className="flex items-center gap-2 flex-1 justify-center text-center truncate">
           <Truck className="w-3.5 h-3.5 text-ink-muted shrink-0" aria-hidden="true" />
           <span className="truncate">{announcement.text}</span>
@@ -45,7 +42,7 @@ export function AnnouncementBar({ announcement }: AnnouncementBarProps) {
               href={announcement.link}
               className="underline font-medium text-ink hover:text-ink-muted shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus rounded-sm"
             >
-              Learn more
+              View details
             </Link>
           )}
         </div>
@@ -53,7 +50,7 @@ export function AnnouncementBar({ announcement }: AnnouncementBarProps) {
           type="button"
           onClick={handleDismiss}
           aria-label="Dismiss announcement"
-          className="p-1 -mr-1 text-ink-muted hover:text-ink rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus min-w-[32px] min-h-[32px] flex items-center justify-center shrink-0"
+          className="p-2 -mr-2 text-ink-muted hover:text-ink rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus min-w-[44px] min-h-[44px] flex items-center justify-center shrink-0"
         >
           <X className="w-3.5 h-3.5" />
         </button>

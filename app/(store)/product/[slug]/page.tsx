@@ -8,26 +8,20 @@ import { Price } from "@/components/shared/Price";
 import { ProductCard } from "@/components/store/ProductCard";
 import { ProductGallery } from "@/components/store/ProductGallery";
 import { ProductActions } from "@/components/store/ProductActions";
-import {
-  ChevronRight,
-  Truck,
-  Store,
-  RotateCcw,
-} from "lucide-react";
+import { ChevronRight, Truck, Store, RotateCcw } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+const FOCUS_RING =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({
-  params,
-}: ProductPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = await fetchQuery(api.products.getBySlug, { slug }).catch(
-    () => null
-  );
+  const product = await fetchQuery(api.products.getBySlug, { slug }).catch(() => null);
 
   if (!product) {
     return {
@@ -67,40 +61,46 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const isLowStock = product.inventoryStatus === "low_stock";
 
   return (
-    <div className="py-8 sm:py-12 space-y-12 sm:space-y-16">
+    <div className="py-6 sm:py-10">
       <Container size="default">
         {/* Breadcrumbs */}
         <nav
           aria-label="Breadcrumb"
           className="flex items-center gap-1.5 text-xs text-ink-muted mb-6 flex-wrap"
         >
-          <Link href="/" className="hover:text-ink transition-colors">
+          <Link
+            href="/"
+            className={`hover:text-ink transition-colors duration-120 rounded ${FOCUS_RING}`}
+          >
             Home
           </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-ink-subtle shrink-0" />
-          <Link href="/catalog" className="hover:text-ink transition-colors">
+          <ChevronRight className="w-3.5 h-3.5 text-ink-subtle shrink-0" aria-hidden="true" />
+          <Link
+            href="/catalog"
+            className={`hover:text-ink transition-colors duration-120 rounded ${FOCUS_RING}`}
+          >
             Catalog
           </Link>
           {product.categorySlug && (
             <>
-              <ChevronRight className="w-3.5 h-3.5 text-ink-subtle shrink-0" />
+              <ChevronRight className="w-3.5 h-3.5 text-ink-subtle shrink-0" aria-hidden="true" />
               <Link
                 href={`/category/${product.categorySlug}`}
-                className="hover:text-ink transition-colors"
+                className={`hover:text-ink transition-colors duration-120 rounded ${FOCUS_RING}`}
               >
                 {product.category}
               </Link>
             </>
           )}
-          <ChevronRight className="w-3.5 h-3.5 text-ink-subtle shrink-0" />
+          <ChevronRight className="w-3.5 h-3.5 text-ink-subtle shrink-0" aria-hidden="true" />
           <span className="text-ink font-medium truncate max-w-[200px] sm:max-w-xs">
             {product.name}
           </span>
         </nav>
 
-        {/* Product Hero: Two-column layout (Gallery on left, Buy panel on right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-          {/* Left Column: Gallery */}
+        {/* Product hero: gallery left, purchase panel right */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left column: gallery */}
           <div className="lg:col-span-7">
             <ProductGallery
               name={product.name}
@@ -111,9 +111,9 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             />
           </div>
 
-          {/* Right Column: Details & Purchasing */}
+          {/* Right column: details and purchasing */}
           <div className="lg:col-span-5 space-y-6">
-            {/* Header / Brand / SKU */}
+            {/* Brand / SKU / title */}
             <div>
               <div className="flex items-center gap-3 text-xs font-mono text-ink-muted mb-2">
                 {product.brand && (
@@ -122,11 +122,11 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                   </span>
                 )}
                 {product.brand && product.sku && (
-                  <span className="text-ink-subtle">·</span>
+                  <span className="text-ink-subtle" aria-hidden="true">
+                    ·
+                  </span>
                 )}
-                {product.sku && (
-                  <span className="text-ink-subtle">SKU: {product.sku}</span>
-                )}
+                {product.sku && <span className="text-ink-subtle">SKU: {product.sku}</span>}
               </div>
 
               <h1 className="font-heading font-bold text-2xl sm:text-3xl text-ink tracking-tight leading-tight">
@@ -134,8 +134,8 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               </h1>
             </div>
 
-            {/* Price section */}
-            <div className="p-4 bg-canvas rounded-lg border border-line flex items-baseline justify-between gap-4">
+            {/* Price and stock */}
+            <div className="bg-canvas rounded-lg border border-line p-4 sm:p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="flex items-baseline gap-3">
                   <Price
@@ -147,31 +147,30 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                   {product.isOnSale && (
                     <Price
                       amount={product.price}
-                      className="text-base text-ink-muted line-through"
+                      className="text-base text-ink-subtle line-through"
                     />
                   )}
                 </div>
-                <p className="text-xs text-ink-muted mt-0.5">
+                <p className="text-xs text-ink-muted mt-1">
                   {settings?.pricesIncludeTaxNote || "Price includes all applicable taxes"}
                 </p>
               </div>
 
-              {/* Stock status indicator */}
-              <div className="text-right">
+              <div className="sm:text-right">
                 {isOutOfStock ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-danger">
-                    <span className="w-2 h-2 rounded-full bg-danger"></span>
-                    Out of Stock
+                  <span className="inline-flex items-center gap-2 text-xs font-semibold text-danger bg-danger-soft border border-danger/30 rounded-sm px-2.5 py-1">
+                    <span className="w-2 h-2 rounded-full bg-danger" aria-hidden="true" />
+                    Out of stock
                   </span>
                 ) : isLowStock ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-warning">
-                    <span className="w-2 h-2 rounded-full bg-warning"></span>
+                  <span className="inline-flex items-center gap-2 text-xs font-semibold text-warning bg-warning-soft border border-warning/30 rounded-sm px-2.5 py-1">
+                    <span className="w-2 h-2 rounded-full bg-warning" aria-hidden="true" />
                     Only {product.availableStock} left
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-success">
-                    <span className="w-2 h-2 rounded-full bg-success"></span>
-                    In Stock ({product.availableStock} units)
+                  <span className="inline-flex items-center gap-2 text-xs font-semibold text-success bg-success-soft border border-success/30 rounded-sm px-2.5 py-1">
+                    <span className="w-2 h-2 rounded-full bg-success" aria-hidden="true" />
+                    In stock: {product.availableStock} units
                   </span>
                 )}
               </div>
@@ -179,60 +178,76 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
             {/* Purchasing actions */}
             <ProductActions
+              productId={product._id}
               name={product.name}
+              slug={product.slug}
+              brand={product.brand}
               sku={product.sku}
+              price={product.price}
+              salePrice={product.salePrice}
+              primaryImageUrl={product.imageUrls[0]}
               availableStock={product.availableStock}
               whatsappNumber={settings?.whatsappNumber}
             />
 
-            {/* Delivery & Store Pickup Quick Summary */}
-            <div className="border border-line rounded-lg divide-y divide-line text-xs bg-surface">
-              <div className="p-3.5 flex items-start gap-3">
-                <Truck className="w-4 h-4 text-ink-muted shrink-0 mt-0.5" />
+            {/* Delivery, pickup and payment facts */}
+            <ul className="border-t border-line divide-y divide-line text-xs">
+              <li className="py-3.5 flex items-start gap-3">
+                <Truck
+                  className="w-4 h-4 text-ink-muted shrink-0 mt-0.5"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
                 <div>
-                  <p className="font-semibold text-ink">Scheduled Delivery</p>
+                  <p className="font-semibold text-ink">Scheduled delivery</p>
                   <p className="text-ink-muted mt-0.5">
                     Same-day / 24 hours within Accra. Greater Accra: 1 - 2 business days.
                   </p>
                 </div>
-              </div>
+              </li>
 
-              <div className="p-3.5 flex items-start gap-3">
-                <Store className="w-4 h-4 text-ink-muted shrink-0 mt-0.5" />
+              <li className="py-3.5 flex items-start gap-3">
+                <Store
+                  className="w-4 h-4 text-ink-muted shrink-0 mt-0.5"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
                 <div>
-                  <p className="font-semibold text-ink">Free In-Store Pickup</p>
+                  <p className="font-semibold text-ink">Free in-store pickup</p>
                   <p className="text-ink-muted mt-0.5">
                     Ready in 2 hours at MB Ventures Main Store (Circle Commercial District).
                   </p>
                 </div>
-              </div>
+              </li>
 
-              <div className="p-3.5 flex items-start gap-3">
-                <RotateCcw className="w-4 h-4 text-ink-muted shrink-0 mt-0.5" />
+              <li className="py-3.5 flex items-start gap-3">
+                <RotateCcw
+                  className="w-4 h-4 text-ink-muted shrink-0 mt-0.5"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
                 <div>
-                  <p className="font-semibold text-ink">Payment Methods</p>
+                  <p className="font-semibold text-ink">Payment methods</p>
                   <p className="text-ink-muted mt-0.5">
                     MTN MoMo, Telecel Cash, Cash on Delivery, or pay at our store counter.
                   </p>
                 </div>
-              </div>
-            </div>
+              </li>
+            </ul>
           </div>
         </div>
 
-        {/* Product Description & Specifications Grid */}
-        <div className="pt-12 sm:pt-16 border-t border-line grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-          {/* Left: Product Description */}
+        {/* Description and specifications */}
+        <div className="mt-8 sm:mt-12 border-t border-line pt-6 sm:pt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-7 space-y-4">
             <h2 className="font-heading font-bold text-lg sm:text-xl text-ink tracking-tight">
-              Product Overview
+              Product overview
             </h2>
-            <div className="prose prose-sm max-w-none text-ink-muted leading-relaxed whitespace-pre-line text-sm sm:text-base">
+            <div className="max-w-none text-ink-muted leading-relaxed whitespace-pre-line text-sm sm:text-base">
               {product.description}
             </div>
           </div>
 
-          {/* Right: Technical Specifications */}
           <div className="lg:col-span-5 space-y-4">
             <h2 className="font-heading font-bold text-lg sm:text-xl text-ink tracking-tight">
               Specifications
@@ -240,49 +255,44 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
             {product.specs && product.specs.length > 0 ? (
               <div className="border border-line rounded-lg overflow-hidden bg-surface">
-                <dl className="divide-y divide-line text-xs">
-                  {product.specs.map((spec: { label: string; value: string; group?: string }, index: number) => (
-                    <div
-                      key={index}
-                      className={`grid grid-cols-3 p-3 gap-2 ${
-                        index % 2 === 0 ? "bg-canvas/50" : "bg-surface"
-                      }`}
-                    >
-                      <dt className="font-medium text-ink-muted">{spec.label}</dt>
-                      <dd className="col-span-2 font-mono text-ink font-semibold">
-                        {spec.value}
-                      </dd>
-                    </div>
-                  ))}
+                <dl className="divide-y divide-line">
+                  {product.specs.map(
+                    (spec: { label: string; value: string; group?: string }, index: number) => (
+                      <div key={index} className="grid grid-cols-3 gap-3 px-4 py-3">
+                        <dt className="text-xs text-ink-muted">{spec.label}</dt>
+                        <dd className="col-span-2 mono-specs text-ink">{spec.value}</dd>
+                      </div>
+                    )
+                  )}
                 </dl>
               </div>
             ) : (
-              <p className="text-xs text-ink-muted italic">
+              <p className="text-xs text-ink-muted">
                 Standard retail manufacturer specifications apply.
               </p>
             )}
           </div>
         </div>
 
-        {/* Related Products Carousel / Grid */}
+        {/* Related products */}
         {relatedProducts.length > 0 && (
-          <div className="pt-12 sm:pt-16 border-t border-line space-y-6">
+          <div className="mt-8 sm:mt-12 border-t border-line pt-6 sm:pt-8 space-y-6">
             <div className="flex items-end justify-between gap-4">
               <div>
-                <span className="text-xs font-mono uppercase tracking-wider text-ink-subtle">
+                <span className="text-xs font-mono uppercase tracking-[0.06em] text-ink-subtle block mb-1">
                   Complementary Gear
                 </span>
-                <h2 className="font-heading font-bold text-xl sm:text-2xl text-ink tracking-tight mt-0.5">
+                <h2 className="font-heading font-bold text-xl sm:text-2xl text-ink tracking-tight">
                   Related products in {product.category}
                 </h2>
               </div>
               {product.categorySlug && (
                 <Link
                   href={`/category/${product.categorySlug}`}
-                  className="text-xs sm:text-sm font-medium text-ink hover:text-link flex items-center gap-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus rounded"
+                  className={`text-sm font-medium text-link flex items-center gap-1.5 min-h-11 rounded ${FOCUS_RING}`}
                 >
                   <span>View all in category</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
+                  <ChevronRight className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
                 </Link>
               )}
             </div>

@@ -5,21 +5,20 @@ import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Container } from "@/components/shared/Container";
 import { ProductCard } from "@/components/store/ProductCard";
-import { ChevronRight, PackageX } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+const FOCUS_RING =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({
-  params,
-}: CategoryPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const category = await fetchQuery(api.categories.getBySlug, { slug }).catch(
-    () => null
-  );
+  const category = await fetchQuery(api.categories.getBySlug, { slug }).catch(() => null);
 
   if (!category) {
     return {
@@ -52,27 +51,32 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         {/* Breadcrumb Navigation */}
         <nav
           aria-label="Breadcrumb"
-          className="flex items-center gap-1.5 text-xs text-ink-muted mb-4"
+          className="flex items-center gap-1.5 text-xs text-ink-muted mb-4 flex-wrap"
         >
-          <Link href="/" className="hover:text-ink transition-colors">
+          <Link href="/" className="hover:text-ink transition-colors duration-120">
             Home
           </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-ink-subtle" />
-          <Link href="/catalog" className="hover:text-ink transition-colors">
+          <ChevronRight className="w-3.5 h-3.5 text-ink-subtle shrink-0" aria-hidden="true" />
+          <Link href="/catalog" className="hover:text-ink transition-colors duration-120">
             Catalog
           </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-ink-subtle" />
-          <span className="text-ink font-semibold">{category.name}</span>
+          <ChevronRight className="w-3.5 h-3.5 text-ink-subtle shrink-0" aria-hidden="true" />
+          <span className="text-ink font-semibold" aria-current="page">
+            {category.name}
+          </span>
         </nav>
 
         {/* Category Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-line">
           <div>
+            <span className="text-xs font-mono uppercase tracking-[0.06em] text-ink-subtle block mb-1">
+              Category
+            </span>
             <h1 className="font-heading font-bold text-2xl sm:text-3xl text-ink tracking-tight">
               {category.name}
             </h1>
             {category.description && (
-              <p className="text-xs sm:text-sm text-ink-muted mt-1 max-w-2xl leading-relaxed">
+              <p className="text-xs sm:text-sm text-ink-muted mt-2 max-w-2xl leading-relaxed">
                 {category.description}
               </p>
             )}
@@ -91,19 +95,19 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             ))}
           </div>
         ) : (
-          <div className="p-12 text-center bg-canvas border border-line rounded-lg mt-6">
-            <PackageX className="w-10 h-10 text-ink-muted mx-auto mb-3" />
-            <h3 className="font-heading font-semibold text-base text-ink">
-              No products available in this category yet
-            </h3>
-            <p className="text-xs text-ink-muted mt-1 max-w-sm mx-auto">
-              Check back shortly or browse other categories in our workspace catalog.
+          <div className="border-t border-line pt-8 max-w-md">
+            <h2 className="font-heading font-semibold text-base text-ink">
+              No products in this category yet
+            </h2>
+            <p className="text-sm text-ink-muted mt-2 leading-relaxed">
+              Browse the full catalog to see the hardware, accessories, and office furniture we
+              currently stock.
             </p>
             <Link
               href="/catalog"
-              className="inline-flex items-center justify-center mt-4 px-4 py-2 rounded-md bg-ink text-surface text-xs font-semibold hover:bg-ink/90 transition-colors"
+              className={`inline-flex items-center justify-center gap-1.5 min-h-11 px-5 mt-4 rounded-md bg-brand text-surface text-sm font-semibold hover:bg-brand-hover active:bg-brand-active transition-colors duration-120 ease-snap ${FOCUS_RING}`}
             >
-              Browse all products
+              <span>Browse all products</span>
             </Link>
           </div>
         )}
